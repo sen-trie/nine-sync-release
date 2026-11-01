@@ -11,3 +11,4 @@ poc/ext_standalone/
 poc/ext_standalone_v4310/
 poc/legacy/
 poc/dist/
+outbox/
