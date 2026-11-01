@@ -1,0 +1,7 @@
+{
+  "_comment": "Stable publication is refused while any gate is false. The owner sets a gate to true only after confirming it.",
+  "website_confirmed": true,
+  "copyright_holder_confirmed": true,
+  "extensions_policy_review_done": false,
+  "bundled_install_tests_passed": false
+}

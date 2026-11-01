@@ -1,0 +1,111 @@
+name: Experimental release (not validated in Blender)
+
+# Separate, manual path for early prereleases. It builds with the same scripts as the stable workflow and keeps
+# the packaging, manifest, licence and checksum checks, but does NOT run Blender. The release is marked
+# Pre-release and says so. Publishing waits for a manual approval on the `experimental-release` environment
+# (configure required reviewers there). The stable workflow (release.yml) is unchanged and still requires
+# full validation.
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Prerelease tag, e.g. v0.1.0-alpha.1 (must not exist)"
+        type: string
+        required: true
+      acknowledge:
+        description: "Type EXPERIMENTAL to confirm this build has NOT been validated in Blender"
+        type: string
+        required: true
+      publish:
+        description: "Publish the pre-release after approval. Off = build and check only."
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: experimental-release
+  cancel-in-progress: false
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  build:
+    name: Build and check (no Blender)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Confirm inputs
+        env:
+          TAG: ${{ inputs.release_tag }}
+          ACK: ${{ inputs.acknowledge }}
+        run: |
+          [ "$ACK" = "EXPERIMENTAL" ] || { echo "acknowledge must be exactly EXPERIMENTAL" >&2; exit 1; }
+          echo "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta|rc)\.[0-9]+$' || { echo "release_tag must look like v0.1.0-alpha.1" >&2; exit 1; }
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Show pinned sources
+        run: git submodule status
+      - name: Build
+        run: python -I packaging/build_bundle.py --out dist --staging build/staging --cache build/downloads
+      - name: Static validation
+        run: python -I packaging/validate_bundle.py dist/nine-sync-*-blender-extensions.zip --report dist/static-validation.json
+      - name: Checksum
+        run: cd dist && sha256sum -c nine-sync-*-blender-extensions.zip.sha256
+      - name: Experimental release checks
+        env:
+          TAG: ${{ inputs.release_tag }}
+        run: python -I packaging/check_experimental.py --dist dist --static dist/static-validation.json --tag "$TAG"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: experimental-extension
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    name: Publish pre-release (needs approval)
+    needs: build
+    if: ${{ inputs.publish }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: experimental-release # required reviewers here = the explicit manual approval
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: experimental-extension
+          path: dist
+      - name: Re-check the downloaded artifacts
+        env:
+          TAG: ${{ inputs.release_tag }}
+        run: |
+          (cd dist && sha256sum -c nine-sync-*-blender-extensions.zip.sha256)
+          python -I packaging/check_experimental.py --dist dist --static dist/static-validation.json --tag "$TAG"
+      - name: Create the pre-release (never overwrites)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.release_tag }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1 || git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "tag or release $TAG already exists; refusing to touch it" >&2; exit 1
+          fi
+          python -I packaging/experimental_notes.py > notes.md
+          gh release create "$TAG" --prerelease --target "$GITHUB_SHA" --title "NineSync $TAG (experimental, unvalidated)" \
+            --notes-file notes.md \
+            dist/nine-sync-*-blender-extensions.zip dist/nine-sync-*-blender-extensions.zip.sha256 \
+            dist/artifact-manifest.json dist/static-validation.json

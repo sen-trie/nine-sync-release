@@ -1,0 +1,169 @@
+name: Bundled release
+
+# Manual only. Builds the combined NineSync extension from the commits pinned by this repository's submodules,
+# validates it, and (only when asked, and only after every owner gate is true) creates a DRAFT GitHub release.
+# Nothing is published automatically: a draft still needs a person to publish it.
+on:
+  workflow_dispatch:
+    inputs:
+      run_validation:
+        description: "Validate inside Blender (official build, 5.3 or newer). Required before publication."
+        type: boolean
+        default: true
+      blender_version:
+        description: "Official Blender release to validate with (must be 5.3.0 or newer and exist on download.blender.org)"
+        type: string
+        default: "5.3.0"
+      blender_url:
+        description: "Optional: explicit Linux x64 tar.xz for a pre-release build (needs blender_sha256). Never counts as official."
+        type: string
+        default: ""
+      blender_sha256:
+        description: "SHA-256 of blender_url"
+        type: string
+        default: ""
+      create_draft_release:
+        description: "Create a DRAFT release with the artifacts (needs validation, an official Blender, and all gates in packaging/release_gates.json)"
+        type: boolean
+        default: false
+      release_tag:
+        description: "Tag for the draft release, e.g. v0.3.0 (required when create_draft_release is true; must not exist)"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bundled-release
+  cancel-in-progress: false
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  build:
+    name: Build and statically validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Check the publication inputs early
+        if: ${{ inputs.create_draft_release }}
+        env:
+          TAG: ${{ inputs.release_tag }}
+          VALIDATE: ${{ inputs.run_validation }}
+        run: |
+          [ -n "$TAG" ] || { echo "release_tag is required for a draft release" >&2; exit 1; }
+          [ "$VALIDATE" = "true" ] || { echo "a draft release needs run_validation" >&2; exit 1; }
+      - name: Show pinned sources
+        run: git submodule status
+      - name: Build
+        run: python -I packaging/build_bundle.py --out dist --staging build/staging --cache build/downloads
+      - name: Static validation
+        run: python -I packaging/validate_bundle.py dist/nine-sync-*-blender-extensions.zip --report dist/static-validation.json
+      - name: Checksum
+        run: cd dist && sha256sum -c nine-sync-*-blender-extensions.zip.sha256
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bundled-extension
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
+
+  validate:
+    name: Validate in Blender
+    needs: build
+    if: ${{ inputs.run_validation }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: bundled-extension
+          path: dist
+      - name: Blender runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libxkbcommon0 libsm6 libegl1
+      - name: Fetch Blender
+        id: blender
+        env:
+          BLENDER_VERSION: ${{ inputs.blender_version }}
+          BLENDER_URL: ${{ inputs.blender_url }}
+          BLENDER_SHA256: ${{ inputs.blender_sha256 }}
+        run: |
+          if [ -n "$BLENDER_URL" ]; then
+            exe=$(python -I packaging/fetch_blender.py --version "$BLENDER_VERSION" --url "$BLENDER_URL" --sha256 "$BLENDER_SHA256" --dest build/blender)
+          else
+            exe=$(python -I packaging/fetch_blender.py --version "$BLENDER_VERSION" --dest build/blender)
+          fi
+          echo "exe=$exe" >> "$GITHUB_OUTPUT"
+          echo "official=$(cat build/blender/official.txt)" >> "$GITHUB_OUTPUT"
+      - name: Validate the ZIP in an isolated profile
+        env:
+          BLENDER_EXE: ${{ steps.blender.outputs.exe }}
+          OFFICIAL: ${{ steps.blender.outputs.official }}
+        run: |
+          flag=""
+          [ "$OFFICIAL" = "true" ] && flag="--official"
+          python -I packaging/validate_in_blender.py --blender "$BLENDER_EXE" \
+            --zip dist/nine-sync-*-blender-extensions.zip --report dist/blender-validation.json $flag
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ always() }}
+        with:
+          name: blender-validation
+          path: dist/blender-validation.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  draft-release:
+    name: Create draft release
+    needs: [build, validate]
+    if: ${{ inputs.create_draft_release && needs.validate.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: release # configure required reviewers on this environment for a manual approval step
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: bundled-extension
+          path: dist
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: blender-validation
+          path: dist
+      - name: Publication gates
+        run: python -I packaging/check_publish_gates.py --dist dist --validation dist/blender-validation.json --static dist/static-validation.json
+      - name: Create the draft release (never overwrites)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.release_tag }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1 || git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "tag or release $TAG already exists; refusing to touch it" >&2; exit 1
+          fi
+          gh release create "$TAG" --draft --target "$GITHUB_SHA" --title "NineSync $TAG" \
+            --notes "Draft. Built from ${GITHUB_SHA} with the submodule pins and dependency lock in this commit. See artifact-manifest.json for commits, dependency versions and checksums." \
+            dist/nine-sync-*-blender-extensions.zip dist/nine-sync-*-blender-extensions.zip.sha256 \
+            dist/artifact-manifest.json dist/static-validation.json dist/blender-validation.json

@@ -1,0 +1,15 @@
+schema_version = "1.0.0"
+id = "ninesync_bundled"
+version = "0.3.0"
+name = "NineSync"
+tagline = "MikuMikuDance projects, accessories and MME effects"
+maintainer = "sentrie"
+website = "https://github.com/sen-trie/nine-sync-release"
+type = "add-on"
+tags = ["Import-Export", "Animation"]
+blender_version_min = "5.3.0"
+license = ["SPDX:GPL-3.0-or-later"]
+copyright = ["2026 sentrie"]
+
+[permissions]
+files = "Read MMD project, model, .x, .fx and audio files; write exports"
