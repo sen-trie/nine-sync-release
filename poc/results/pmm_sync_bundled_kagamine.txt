@@ -1,0 +1,32 @@
+STATUS Installed "ninesync"
+PMMSYNC mmd_tools operator module: bl_ext.user_default.ninesync_poc.third_party.mmd_tools.operators.fileio
+enabled: ['bl_ext.user_default.ninesync'] | Blender 5.3.0 Beta
+ok   30 fps: sync finished | Synced 3 item(s) at 11:48:01
+ok   30 fps/鏡音レン: bone keys frames | 104 keys, 0 bones not in PMX
+ok   30 fps/鏡音レン: no real motion on unmatched bones
+ok   30 fps/鏡音レン: bone location length and rotation angle
+ok   30 fps/鏡音レン: morph values with groups expanded | 0 values, 0 of them UV
+ok   30 fps: camera frames | ([0], [0])
+ok   30 fps: camera values
+ok   30 fps: light colour and direction | 1 keys
+ok   30 fps: light keys not eased | ['LINEAR']
+ok   30 fps: light actions stay separate
+ok   resync: sync finished | Synced 3 item(s) at 11:48:01
+ok   resync adds no keys
+ok   resync keeps one sound strip
+ok   60 fps: sync finished | Synced 3 item(s) at 11:48:01
+ok   60 fps/鏡音レン: bone keys frames | 104 keys, 0 bones not in PMX
+ok   60 fps/鏡音レン: no real motion on unmatched bones
+ok   60 fps/鏡音レン: bone location length and rotation angle
+ok   60 fps/鏡音レン: morph values with groups expanded | 0 values, 0 of them UV
+ok   60 fps: camera frames | ([0], [0])
+ok   60 fps: camera values
+ok   60 fps: light colour and direction | 1 keys
+ok   60 fps: light keys not eased | ['LINEAR']
+ok   60 fps: light actions stay separate
+ok   report has no failed hook
+ok   clean finished every model | [('鏡音レン', 'cleaned')]
+ok   clean removed model animation | 0
+ok   clean left no bridge actions
+ok   clean rested the bones
+FAILED: []

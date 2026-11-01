@@ -1,0 +1,203 @@
+{
+ "summary": {
+  "scenario": "startup_check",
+  "failures": [],
+  "records": 9
+ },
+ "records": [
+  {
+   "label": "both add-ons enabled at launch",
+   "mode": "external",
+   "ticks": 8,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": null,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true
+  },
+  {
+   "label": "coherent registration after launch (external)",
+   "mode": "external",
+   "ticks": 8,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": null,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true,
+   "owner": "bl_ext.user_default.mmd_tools.operators.fileio"
+  },
+  {
+   "label": "exactly one set of mmd handlers",
+   "mode": "external",
+   "ticks": 8,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": null,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true
+  },
+  {
+   "label": "menus not duplicated",
+   "mode": "external",
+   "ticks": 8,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": null,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true
+  },
+  {
+   "label": "make model",
+   "mode": "external",
+   "ticks": 8,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": null,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "disable standalone",
+   "mode": "external",
+   "ticks": 8,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": null,
+   "load_post": 2,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "bundled takes over after standalone disabled",
+   "mode": "internal",
+   "ticks": 11,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true
+  },
+  {
+   "label": "enable standalone",
+   "mode": "internal",
+   "ticks": 11,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 21,
+   "load_post": 4,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 2,
+   "menu_import": 7,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "external again",
+   "mode": "external",
+   "ticks": 14,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 21,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true
+  }
+ ]
+}

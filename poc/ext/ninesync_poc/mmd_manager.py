@@ -1,13 +1,15 @@
 import importlib
-import re
 import traceback
 
 import bpy
 
-# "internal": bundled copy registered by us. "external": a standalone mmd_tools was
-# active, so nothing of ours is registered. None: not started.
+# "internal": bundled copy registered by us. "external": a standalone mmd_tools owns the
+# registration. "conflict"/"failed": the bundled copy is NOT registered and last_error says
+# why. None: not started.
 mode = None
 last_error = None
+CHECK_INTERVAL = 0.5
+ticks = 0
 _bundled = None
 
 
@@ -15,12 +17,10 @@ def _log(*parts):
     print("[ninesync_poc]", *parts, flush=True)
 
 
-# Standalone mmd_tools is recognised by its registered Object.mmd_root property, which
-# holds regardless of the package name it was installed under (extension or legacy).
-def external_registered():
-    return mode != "internal" and "mmd_root" in bpy.types.Object.bl_rna.properties
-
-
+# Only for log messages. Whether a standalone really owns the registration is decided
+# from the registered properties and the bundled classes' state, not from this list: an
+# add-on that is listed but failed to register (e.g. an mmd_tools too old for this
+# Blender) must not suppress the bundled copy.
 def external_module_names():
     return [
         name
@@ -30,6 +30,10 @@ def external_module_names():
     ]
 
 
+def _props_registered():
+    return "mmd_root" in bpy.types.Object.bl_rna.properties
+
+
 def _import_bundled():
     global _bundled
     if _bundled is None:
@@ -37,39 +41,54 @@ def _import_bundled():
     return _bundled
 
 
-# Registers the bundled copy and, on any failure, unregisters whatever got registered
-# so a retry starts from a clean state.
-def _register_bundled():
+def _parts():
     module = _import_bundled()
     auto_load = importlib.import_module(".auto_load", module.__package__)
-    registered = []
+    handlers = importlib.import_module(".handlers", module.__package__)
+    m17n = importlib.import_module(".m17n", module.__package__)
+    return module, auto_load, handlers, m17n
+
+
+# True while every bundled class is still the registered one. A standalone registering
+# later replaces same-named classes, so this turns False at once without relying on the
+# add-on list.
+def bundled_intact():
+    _module, auto_load, _handlers, _m17n = _parts()
+    return _props_registered() and all(getattr(c, "is_registered", False) for c in auto_load.ordered_classes)
+
+
+# Registers the bundled copy. Classes that a handover left registered are not
+# unregistered (their property hooks would delete properties); their own register hook
+# is re-run instead, which recreates the properties and menu entries the standalone
+# removed. A failure rolls back what this call registered.
+def _register_bundled():
+    module, auto_load, handlers, m17n = _parts()
+    fresh = []
+    rehooked = []
     try:
         for cls in auto_load.ordered_classes:
-            bpy.utils.register_class(cls)
-            registered.append(cls)
+            if getattr(cls, "is_registered", False):
+                if hasattr(cls, "register"):
+                    cls.register()
+                rehooked.append(cls)
+            else:
+                bpy.utils.register_class(cls)
+                fresh.append(cls)
         for sub in auto_load.modules:
-            if sub.__name__ == auto_load.__name__:
-                continue
-            if hasattr(sub, "register"):
+            if sub.__name__ != auto_load.__name__ and hasattr(sub, "register"):
                 sub.register()
-        from_handlers = importlib.import_module(".handlers", module.__package__)
-        bpy.app.translations.register(
-            module.PACKAGE_NAME, importlib.import_module(".m17n", module.__package__).translations_dict
-        )
-        from_handlers.MMDHanders.register()
+        bpy.app.translations.register(module.PACKAGE_NAME, m17n.translations_dict)
+        handlers.MMDHanders.register()
     except Exception:
         _log("bundled registration failed, rolling back")
         traceback.print_exc()
-        _rollback(module, auto_load, registered)
+        _rollback(fresh)
         raise
 
 
-def _rollback(module, auto_load, registered):
-    handlers = importlib.import_module(".handlers", module.__package__)
-    for step in (
-        handlers.MMDHanders.unregister,
-        lambda: bpy.app.translations.unregister(module.PACKAGE_NAME),
-    ):
+def _rollback(fresh):
+    module, auto_load, handlers, _m17n = _parts()
+    for step in (handlers.MMDHanders.unregister, lambda: bpy.app.translations.unregister(module.PACKAGE_NAME)):
         try:
             step()
         except Exception:
@@ -80,54 +99,21 @@ def _rollback(module, auto_load, registered):
                 sub.unregister()
             except Exception:
                 pass
-    for cls in reversed(registered):
+    for cls in reversed(fresh):
         try:
             bpy.utils.unregister_class(cls)
         except Exception:
             pass
 
 
-def _start_watchdog():
-    if not bpy.app.timers.is_registered(check):
-        bpy.app.timers.register(check, first_interval=1.0, persistent=True)
-
-
-def start():
-    global mode, last_error
-    last_error = None
-    if external_registered():
-        mode = "external"
-        _log("standalone mmd_tools active, bundled copy not registered:", external_module_names())
-        _start_watchdog()
-        return mode
-    try:
-        _register_bundled()
-    except Exception as error:
-        mode = None
-        last_error = repr(error)
-        return mode
-    mode = "internal"
-    _log("bundled mmd_tools registered")
-    _start_watchdog()
-    return mode
-
-
-# Called when a standalone mmd_tools was enabled after the bundled copy registered. Blender
-# lets the later registration replace same-named classes, and the property hooks of the
-# classes it replaced would delete properties the standalone now owns. So no class or
-# property is unregistered here; only identity-specific hooks are removed: handlers,
-# translations, keymap items and menu draw functions of our copy. Leaked classes are
-# purged before any later re-registration (see _purge_leaked).
+# Removes only what is identity-specific to the bundled copy after a standalone has
+# replaced the shared registrations: handlers, translations, keymap items, menu entries.
+# No class or property is unregistered.
 def _abandon_bundled():
-    module = _import_bundled()
-    handlers = importlib.import_module(".handlers", module.__package__)
+    module, _auto_load, handlers, _m17n = _parts()
     fileio = importlib.import_module(".operators.fileio", module.__package__)
     menus = importlib.import_module(".menus", module.__package__)
-    steps = [
-        handlers.MMDHanders.unregister,
-        lambda: bpy.app.translations.unregister(module.PACKAGE_NAME),
-        fileio.unregister,
-    ]
+    steps = [handlers.MMDHanders.unregister, lambda: bpy.app.translations.unregister(module.PACKAGE_NAME), fileio.unregister]
     for name in dir(menus):
         menu = getattr(menus, name)
         if hasattr(menu, "draw_menu") and hasattr(menu, "unregister"):
@@ -139,63 +125,57 @@ def _abandon_bundled():
             traceback.print_exc()
 
 
-# Unregisters one class of ours that a handover left registered. Its property hook may
-# delete an attribute the standalone's unregister already removed, which raises before
-# Blender drops the class; the missing attribute is stubbed so the hook can finish.
-def _unregister_stale(cls):
-    stubs = []
-    for _ in range(24):
-        for owner, name in stubs:
-            if not hasattr(owner, name):
-                setattr(owner, name, bpy.props.BoolProperty())
+def start():
+    global mode, last_error
+    last_error = None
+    if _props_registered():
+        mode = "external"
+        _log("standalone mmd_tools present, bundled copy not registered:", external_module_names())
+    else:
         try:
-            bpy.utils.unregister_class(cls)
-            return True
-        except AttributeError as error:
-            found = re.search(r"type object '(\w+)' has no attribute '(\w+)'", str(error))
-            owner = getattr(bpy.types, found.group(1), None) if found else None
-            if owner is None or (owner, found.group(2)) in stubs:
-                _log("stale unregister failed:", cls.__name__, error)
-                return False
-            stubs.append((owner, found.group(2)))
+            _register_bundled()
+            mode = "internal"
+            _log("bundled mmd_tools registered")
         except Exception as error:
-            _log("stale unregister failed:", cls.__name__, type(error).__name__, error)
-            return False
-    return False
+            mode = "failed"
+            last_error = "bundled mmd_tools failed to register: %r" % (error,)
+    _start_watchdog()
+    return mode
 
 
-# Before registering the bundled copy again, drops classes of ours that an earlier
-# handover left registered.
-def _purge_leaked():
-    module = _import_bundled()
-    auto_load = importlib.import_module(".auto_load", module.__package__)
-    failed = []
-    for cls in reversed(auto_load.ordered_classes):
-        if getattr(cls, "is_registered", False) and not _unregister_stale(cls):
-            failed.append(cls.__name__)
-    if failed:
-        _log("could not purge stale classes:", failed)
-
-
-# Reconciles our mode with whichever mmd_tools is active. Run from a timer in Blender.
+# Reconciles the mode with reality. Cheap; also called before every NineSync operation so
+# correctness does not depend on the timer having ticked.
 def check():
-    global mode
-    if mode == "internal" and external_module_names():
-        _log("standalone mmd_tools appeared, handing over")
+    global mode, last_error, ticks
+    ticks += 1
+    if mode == "internal" and not bundled_intact():
+        _log("registration was taken over or broken, handing over")
         _abandon_bundled()
         mode = "external"
-    elif mode == "external" and not external_module_names() and not external_registered():
-        _log("standalone mmd_tools went away, registering bundled copy")
-        _purge_leaked()
-        start()
-    return 1.0
+    if mode == "external" and not _props_registered():
+        _log("no standalone mmd_tools left, registering bundled copy")
+        try:
+            _register_bundled()
+            if not bundled_intact():
+                raise RuntimeError("bundled registration incomplete")
+            mode = "internal"
+        except Exception as error:
+            mode = "conflict"
+            last_error = "could not take over from standalone mmd_tools: %r" % (error,)
+    return CHECK_INTERVAL
+
+
+def _start_watchdog():
+    if not bpy.app.timers.is_registered(check):
+        bpy.app.timers.register(check, first_interval=CHECK_INTERVAL, persistent=True)
 
 
 def stop():
     global mode
     if bpy.app.timers.is_registered(check):
         bpy.app.timers.unregister(check)
-    if mode == "internal":
-        module = _import_bundled()
-        module.unregister()
+    if mode == "internal" and bundled_intact():
+        _import_bundled().unregister()
+    elif mode in ("internal", "conflict"):
+        _abandon_bundled()
     mode = None
