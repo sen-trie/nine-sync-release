@@ -1,3 +1,5 @@
+> **Superseded (2026-11-01).** The owner decided against bundling mmd_tools: the combined extension now requires the user's own mmd_tools and never registers one. This document is kept as the record of the coexistence POC.
+
 # POC: conditional registration of a bundled mmd_tools
 
 Decision and full result table: [GO_NO_GO_BUNDLED_MMD_TOOLS.md](GO_NO_GO_BUNDLED_MMD_TOOLS.md). This file is the how-to-run and history.

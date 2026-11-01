@@ -97,14 +97,18 @@ def main(argv=None):
     # --- layout
     top = {n.split("/")[0] for n in names}
     rep.check("top-level layout", top <= {"blender_manifest.toml", "__init__.py", "LICENSE", "THIRD_PARTY_NOTICES.md",
-                                          "ninesync_core", "ninesync_fx", "third_party"}, str(sorted(top)))
+                                          "ninesync_core", "ninesync_fx"}, str(sorted(top)))
     bad = [n for n in names if (set(n.split("/")[:-1]) & FORBIDDEN_PARTS) or n.startswith(FORBIDDEN_PREFIXES)
            or any(fnmatch.fnmatch(n.split("/")[-1], p) for p in FORBIDDEN_NAMES)]
     rep.check("no developer-only, cache or credential files", not bad, str(bad[:10]))
-    rep.check("no nested blender_manifest.toml", [n for n in names if n.endswith("blender_manifest.toml") and n != "blender_manifest.toml"] == []
-              or all(n.startswith("third_party/") for n in names if n.endswith("blender_manifest.toml") and n != "blender_manifest.toml"),
-              "only upstream mmd_tools' own manifest (read at import) may be nested")
-    rep.check("mmd_tools keeps its manifest (read at import)", "third_party/mmd_tools/blender_manifest.toml" in data)
+    rep.check("no nested blender_manifest.toml", [n for n in names if n.endswith("blender_manifest.toml") and n != "blender_manifest.toml"] == [])
+    rep.check("mmd_tools is not bundled (external dependency)",
+              not [n for n in names if n.startswith("third_party/") or "/mmd_tools/" in "/" + n or n.startswith("mmd_tools/")], "")
+    core_link = data.get("ninesync_core/sync/mmd_tools_link.py", b"").decode("utf-8")
+    rep.check("Core validates the external mmd_tools (version and API)",
+              "MMD_TOOLS_MIN_VERSION" in core_link and "REQUIRED_API" in core_link and "def mmd_tools_status" in core_link)
+    rep.check("bundle entry point does not register mmd_tools",
+              b"mmd_tools" not in re.sub(rb"(?m)^\s*#.*$", b"", data.get("__init__.py", b"")))
     rep.check("no duplicate paths", len(names) == len(set(names)))
 
     # --- versions
@@ -145,14 +149,10 @@ def main(argv=None):
 
     # --- licences and dependencies
     for required in ("LICENSE", "THIRD_PARTY_NOTICES.md", "ninesync_core/LICENSE", "ninesync_fx/LICENSE",
-                     "third_party/mmd_tools/LICENSE", "third_party/mmd_tools/externals/opencc/LICENSE",
-                     "third_party/mmd_tools/externals/opencc/NOTICE.txt", "ninesync_fx/x_importer_bundled/LICENSE"):
+                     "ninesync_fx/x_importer_bundled/LICENSE"):
         rep.check("licence file: " + required, required in data and len(data[required]) > 500 or required.endswith("NOTICE.txt") and required in data)
     rep.check("GPL text in root LICENSE", b"GNU GENERAL PUBLIC LICENSE" in data.get("LICENSE", b"") and b"Version 3" in data.get("LICENSE", b""))
-    mmd_lock = lock["components"]["mmd_tools"]
-    mmd_manifest = tomllib.loads(data.get("third_party/mmd_tools/blender_manifest.toml", b"").decode("utf-8") or "")
-    rep.check("mmd_tools pinned version", mmd_manifest.get("version") == mmd_lock["version"], str(mmd_manifest.get("version")))
-    rep.check("mmd_tools licence is GPL-3.0-or-later", mmd_manifest.get("license") == ["SPDX:GPL-3.0-or-later"])
+    rep.check("dependency lock lists only the .x importer", sorted(lock["components"]) == ["io_directx_x"], str(sorted(lock["components"])))
     iox = lock["components"]["io_directx_x"]
     importer_files = sorted(n for n in names if n.startswith("ninesync_fx/x_importer_bundled/"))
     rep.check("x importer: exact file set", [n.rsplit("/", 1)[1] for n in importer_files] == sorted(["__init__.py"] + iox["files"]),

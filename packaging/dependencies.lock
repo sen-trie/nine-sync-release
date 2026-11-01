@@ -1,19 +1,6 @@
 {
   "lock_version": 1,
   "components": {
-    "mmd_tools": {
-      "version": "4.5.5",
-      "license": "GPL-3.0-or-later",
-      "source_url": "https://github.com/MMD-Blender/blender_mmd_tools/releases/download/v4.5.5/mmd_tools-v4.5.5-bl4.2.zip",
-      "sha256": "b68abf8a0e0cff02129c587c5f00b05427a9b49adc13796f8162e1c89130f33a",
-      "upstream_repo": "https://github.com/MMD-Blender/blender_mmd_tools",
-      "upstream_tag": "v4.5.5",
-      "upstream_commit": "0845cf64aa4928ff7a5b7b52fff5a9bf8c681338",
-      "strip_prefix": "",
-      "dest": "third_party/mmd_tools",
-      "keep_licences": ["LICENSE", "externals/opencc/LICENSE", "externals/opencc/NOTICE.txt", "externals/MikuMikuDance/README.txt"],
-      "exclude": ["__pycache__/", "*.pyc", ".vscode/", ".venv/"]
-    },
     "io_directx_x": {
       "version": "1.4.0",
       "license": "GPL-3.0-or-later",
@@ -24,7 +11,11 @@
       "upstream_commit": null,
       "strip_prefix": "io_directx_x-master/",
       "dest": "ninesync_fx/x_importer_bundled",
-      "files": ["importer.py", "parser.py", "LICENSE"],
+      "files": [
+        "importer.py",
+        "parser.py",
+        "LICENSE"
+      ],
       "api": "importer.import_x(context, filepath, **options)",
       "notes": "Only the import half is vendored; the exporter and the operator-registering __init__ are not, so no operator ids can collide with a standalone io_directx_x. The archive hash is the pin; upstream publishes no tag or commit id in the archive."
     }

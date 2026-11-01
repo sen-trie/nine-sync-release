@@ -1,3 +1,5 @@
+> **Superseded (2026-11-01).** The owner decided against bundling mmd_tools: the combined extension now requires the user's own mmd_tools and never registers one. This document is kept as the record of the coexistence POC.
+
 # Go / no-go: bundling mmd_tools in the combined NineSync extension
 
 Date: 2026-11-01. Author: Release agent. Decision owner: the project owner.

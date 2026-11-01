@@ -228,8 +228,7 @@ def notices(lock, child_info):
             name, spec["version"], spec["license"], spec["dest"], spec["upstream_repo"], spec["sha256"]))
     lines += [
         "",
-        "mmd_tools additionally contains OpenCC (Apache-2.0; externals/opencc/LICENSE and NOTICE.txt) and the",
-        "MikuMikuDance default toon bitmaps (externals/MikuMikuDance/README.txt).",
+        "mmd_tools is NOT part of this package. It is a separate extension the user installs; NineSync only calls it.",
         "",
     ]
     return "\n".join(lines).encode("utf-8")

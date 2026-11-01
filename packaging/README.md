@@ -63,5 +63,10 @@ SaintBaron. Only `importer.py`, `parser.py` and `LICENSE` are included, plus a g
 that archive. The files carry no per-file copyright line, so attribution is the maintainer name, source URL and
 the full licence text, all listed in the generated `THIRD_PARTY_NOTICES.md`.
 
-mmd_tools 4.5.5 (GPL-3.0-or-later, with OpenCC under Apache-2.0) is pinned by release-archive SHA-256 and upstream
-tag commit in the same file.
+## mmd_tools is external
+
+The combined ZIP contains no mmd_tools. Core finds the user's installed mmd_tools through its registered operators and
+checks its version (>= 4.5.5, `MMD_TOOLS_MIN_VERSION` in Core's `sync/mmd_tools_link.py`) and the API Core calls
+(`REQUIRED_API`). `validate_bundle.py` fails the build if any mmd_tools file is present or the entry point mentions
+mmd_tools. `test_fixtures.lock` pins the mmd_tools 4.5.5 release archive (SHA-256) that `validate_in_blender.py` installs
+into its isolated profile; it is test-only.

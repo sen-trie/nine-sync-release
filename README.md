@@ -24,11 +24,17 @@ The same ZIPs are attached to GitHub Releases (with `.sha256`, `artifact-manifes
 NineSync supports two configurations:
 
 1. **Standalone:** NineSync Core and FX enabled separately, with their required dependencies.
-2. **Bundled:** The combined NineSync release enabled with its bundled dependencies.
+2. **Combined:** The combined NineSync release, which contains Core and FX.
 
-Both configurations may be installed together, but **simultaneous activation is unsupported** and may cause conflicts or unexpected behavior.
+Both configurations may be installed together, but **simultaneous activation is unsupported** and may cause conflicts or unexpected behavior. The combined extension refuses to start while standalone Core or FX is registered; it never disables another extension.
 
 Disable one configuration before enabling the other. Restarting Blender when switching is recommended.
+
+### Required: mmd_tools (install it yourself)
+
+NineSync does **not** include mmd_tools, in either configuration. Install and enable the separate [mmd_tools](https://extensions.blender.org/add-ons/mmd-tools/) extension, **version 4.5.5 or newer**, from the Blender extensions platform. NineSync only calls it: it never installs, updates, replaces or unregisters mmd_tools, and enabling or disabling NineSync leaves mmd_tools untouched.
+
+If mmd_tools is missing, disabled or too old, NineSync still loads and its panel shows a notice saying which; syncing stays unavailable until you fix it. Enable order does not matter. The combined extension also needs no `.x` importer add-on (it carries its own import-only copy); the standalone FX add-on treats the DirectX X Importer as optional.
 
 ## Building the bundled extension
 
@@ -40,8 +46,10 @@ python -I packaging/validate_bundle.py dist/nine-sync-<version>-blender-extensio
 python -I packaging/validate_in_blender.py --blender <blender 5.3+> --zip dist/<zip> --report dist/blender-validation.json
 ```
 
+`validate_in_blender.py` installs the pinned mmd_tools from `packaging/test_fixtures.lock` into its throwaway profile as the external dependency. That fixture is test-only and never enters the ZIP.
+
 CI: Actions > "Bundled release" > Run workflow. It builds, validates statically, validates inside an official Blender 5.3 or newer, and only on request creates a **draft** release and/or adds the build to the GitHub Pages extension repository, once every owner gate in `packaging/release_gates.json` is true and a reviewer approves the matching environment. Nothing is published automatically.
 
 ## Licence
 
-NineSync is GPL-3.0-or-later. Bundled third-party components keep their own licences; see the dependency and licence audit once it exists.
+NineSync is GPL-3.0-or-later. Bundled third-party components (the DirectX `.x` importer) keep their own licences; see `THIRD_PARTY_NOTICES.md` in the combined ZIP. mmd_tools is not bundled.

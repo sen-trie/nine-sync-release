@@ -1,8 +1,12 @@
-# NineSync, combined extension. Registers bundled mmd_tools, NineSync: PMM Bridge and NineSync: FX Importer
-# as namespaced components of this one package. Nothing is added to sys.path or sys.modules.
+# NineSync, combined extension. Registers NineSync: PMM Bridge and NineSync: FX Importer as namespaced
+# components of this one package. Nothing is added to sys.path or sys.modules.
 #
-# Unsupported: running this next to standalone NineSync Core / FX / mmd_tools. The entry point detects
-# their registrations before it registers anything and refuses to start (fail closed); it never disables
+# mmd_tools is NOT part of this package: Core uses the user's separately installed mmd_tools extension and
+# reports in its panel when it is missing, disabled or too old. This module never registers, unregisters or
+# inspects mmd_tools, so enabling or disabling NineSync cannot affect it.
+#
+# Unsupported: running this next to standalone NineSync Core / FX. The entry point detects their
+# registrations before it registers anything and refuses to start (fail closed); it never disables
 # or changes another add-on.
 
 BUNDLE_VERSION = (0, 3, 0)
@@ -21,15 +25,13 @@ import importlib
 
 import bpy
 
-COMPONENTS = ("third_party.mmd_tools", "ninesync_core", "ninesync_fx")
+COMPONENTS = ("ninesync_core", "ninesync_fx")
 
 _state = {"registered": []}
 
 
 def foreign_registrations():
     found = []
-    if hasattr(bpy.types.Object, "mmd_root"):
-        found.append("mmd_tools")
     if hasattr(bpy.types.Scene, "mmd_bridge"):
         found.append("NineSync: PMM Bridge")
     if hasattr(bpy.types.Scene, "ninesync_fx"):
