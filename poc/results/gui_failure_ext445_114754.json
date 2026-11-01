@@ -1,0 +1,161 @@
+{
+ "summary": {
+  "scenario": "failure",
+  "failures": [],
+  "records": 8
+ },
+ "records": [
+  {
+   "label": "enable with injected failure",
+   "mode": "failed",
+   "ticks": 0,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": 0,
+   "load_post": 2,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": "bundled mmd_tools failed to register: RuntimeError('injected')"
+  },
+  {
+   "label": "failed mode, nothing registered",
+   "mode": "failed",
+   "ticks": 0,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": 0,
+   "load_post": 2,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": "bundled mmd_tools failed to register: RuntimeError('injected')",
+   "ok": true
+  },
+  {
+   "label": "still failed after ticks (no retry loop)",
+   "mode": "failed",
+   "ticks": 2,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": 0,
+   "load_post": 2,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": "bundled mmd_tools failed to register: RuntimeError('injected')",
+   "ok": true
+  },
+  {
+   "label": "disable",
+   "mode": null,
+   "ticks": 2,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": 0,
+   "load_post": 2,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [],
+   "err": "bundled mmd_tools failed to register: RuntimeError('injected')"
+  },
+  {
+   "label": "enable (recover)",
+   "mode": "internal",
+   "ticks": 2,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "recovered",
+   "mode": "internal",
+   "ticks": 2,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true
+  },
+  {
+   "label": "disable",
+   "mode": null,
+   "ticks": 2,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": 0,
+   "load_post": 2,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [],
+   "err": null
+  },
+  {
+   "label": "clean",
+   "mode": null,
+   "ticks": 2,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": 0,
+   "load_post": 2,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [],
+   "err": null,
+   "ok": true
+  }
+ ]
+}

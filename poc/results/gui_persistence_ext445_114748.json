@@ -1,0 +1,313 @@
+{
+ "summary": {
+  "scenario": "persistence",
+  "failures": [],
+  "records": 14
+ },
+ "records": [
+  {
+   "label": "enable poc",
+   "mode": "internal",
+   "ticks": 0,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "make model",
+   "mode": "internal",
+   "ticks": 0,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "script.reload",
+   "mode": "internal",
+   "ticks": 0,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "alive after script.reload",
+   "mode": "internal",
+   "ticks": 2,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 4,
+   "load_post_names": [
+    "_on_blendfile_load_post@gui",
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true,
+   "roots": [
+    [
+     "p1",
+     "keep-p1"
+    ]
+   ]
+  },
+  {
+   "label": "save",
+   "mode": "internal",
+   "ticks": 2,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 4,
+   "load_post_names": [
+    "_on_blendfile_load_post@gui",
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "new file",
+   "mode": "internal",
+   "ticks": 2,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 4,
+   "load_post_names": [
+    "_on_blendfile_load_post@gui",
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "timer survives new file",
+   "mode": "internal",
+   "ticks": 4,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 4,
+   "load_post_names": [
+    "_on_blendfile_load_post@gui",
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true
+  },
+  {
+   "label": "open saved",
+   "mode": "internal",
+   "ticks": 4,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 4,
+   "load_post_names": [
+    "_on_blendfile_load_post@gui",
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "data after reopen",
+   "mode": "internal",
+   "ticks": 4,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 4,
+   "load_post_names": [
+    "_on_blendfile_load_post@gui",
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true,
+   "roots": [
+    [
+     "p1",
+     "keep-p1"
+    ]
+   ]
+  },
+  {
+   "label": "disable poc",
+   "mode": null,
+   "ticks": 4,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": 0,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@gui",
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [],
+   "err": null
+  },
+  {
+   "label": "save with poc disabled",
+   "mode": null,
+   "ticks": 4,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": 0,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@gui",
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [],
+   "err": null
+  },
+  {
+   "label": "reopen with poc disabled",
+   "mode": null,
+   "ticks": 4,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": 0,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@gui",
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [],
+   "err": null
+  },
+  {
+   "label": "enable poc",
+   "mode": "internal",
+   "ticks": 4,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 4,
+   "load_post_names": [
+    "_on_blendfile_load_post@gui",
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "data after re-enable",
+   "mode": "internal",
+   "ticks": 4,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 4,
+   "load_post_names": [
+    "_on_blendfile_load_post@gui",
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true,
+   "roots": [
+    [
+     "p1",
+     "keep-p1"
+    ]
+   ]
+  }
+ ]
+}

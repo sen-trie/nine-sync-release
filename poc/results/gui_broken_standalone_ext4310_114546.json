@@ -1,0 +1,238 @@
+{
+ "summary": {
+  "scenario": "broken_standalone",
+  "failures": [],
+  "records": 11
+ },
+ "records": [
+  {
+   "label": "standalone enable failed as expected",
+   "mode": null,
+   "ticks": null,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": null,
+   "load_post": 2,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [
+    "mmd_tools"
+   ],
+   "err": null,
+   "error": "'module' object has no attribute 'ActionFCurves'"
+  },
+  {
+   "label": "enable poc",
+   "mode": "internal",
+   "ticks": 0,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "bundled copy used despite listed-but-broken standalone",
+   "mode": "internal",
+   "ticks": 0,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true
+  },
+  {
+   "label": "stays internal across ticks",
+   "mode": "internal",
+   "ticks": 3,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true
+  },
+  {
+   "label": "make model",
+   "mode": "internal",
+   "ticks": 3,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "disable poc",
+   "mode": null,
+   "ticks": 3,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": 0,
+   "load_post": 2,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [
+    "mmd_tools"
+   ],
+   "err": null
+  },
+  {
+   "label": "clean",
+   "mode": null,
+   "ticks": 3,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": 0,
+   "load_post": 2,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [
+    "mmd_tools"
+   ],
+   "err": null,
+   "ok": true
+  },
+  {
+   "label": "enable poc with broken standalone listed first time order 2",
+   "mode": "internal",
+   "ticks": 3,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "internal again",
+   "mode": "internal",
+   "ticks": 3,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true
+  },
+  {
+   "label": "bundled-first then broken standalone: still intact",
+   "mode": "internal",
+   "ticks": 6,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true
+  },
+  {
+   "label": "disable poc",
+   "mode": null,
+   "ticks": 6,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": 0,
+   "load_post": 2,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [
+    "mmd_tools"
+   ],
+   "err": null
+  }
+ ]
+}

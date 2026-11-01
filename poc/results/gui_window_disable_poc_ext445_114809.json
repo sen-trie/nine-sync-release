@@ -1,0 +1,147 @@
+{
+ "summary": {
+  "scenario": "window_disable_poc",
+  "failures": [],
+  "records": 7
+ },
+ "records": [
+  {
+   "label": "enable poc",
+   "mode": "internal",
+   "ticks": 0,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "enable standalone",
+   "mode": "internal",
+   "ticks": 0,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 21,
+   "load_post": 4,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 2,
+   "menu_import": 7,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "disable poc before any tick",
+   "mode": null,
+   "ticks": 0,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 21,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools"
+   ],
+   "err": null
+  },
+  {
+   "label": "standalone fully functional",
+   "mode": null,
+   "ticks": 0,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 21,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools"
+   ],
+   "err": null,
+   "ok": true
+  },
+  {
+   "label": "make model on standalone",
+   "mode": null,
+   "ticks": 0,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 21,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "mmd_tools"
+   ],
+   "err": null
+  },
+  {
+   "label": "disable standalone",
+   "mode": null,
+   "ticks": 0,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": 21,
+   "load_post": 2,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [],
+   "err": null
+  },
+  {
+   "label": "clean",
+   "mode": null,
+   "ticks": 0,
+   "ops": 0,
+   "props": 0,
+   "bundled_registered": 21,
+   "load_post": 2,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui"
+   ],
+   "save_pre": 0,
+   "menu_import": 5,
+   "addons": [],
+   "err": null,
+   "ok": true
+  }
+ ]
+}

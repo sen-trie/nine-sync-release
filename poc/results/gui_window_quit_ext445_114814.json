@@ -1,0 +1,74 @@
+{
+ "summary": {
+  "scenario": "window_quit",
+  "failures": [],
+  "records": 3
+ },
+ "records": [
+  {
+   "label": "enable poc",
+   "mode": "internal",
+   "ticks": 0,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 183,
+   "load_post": 3,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 1,
+   "menu_import": 6,
+   "addons": [
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "enable standalone",
+   "mode": "internal",
+   "ticks": 0,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 21,
+   "load_post": 4,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 2,
+   "menu_import": 7,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null
+  },
+  {
+   "label": "quitting inside the window",
+   "mode": "internal",
+   "ticks": 0,
+   "ops": 113,
+   "props": 5,
+   "bundled_registered": 21,
+   "load_post": 4,
+   "load_post_names": [
+    "_on_blendfile_load_post@copy_global_transform",
+    "_on_blendfile_load_post@gui",
+    "MMDHanders.load_hander@handlers",
+    "MMDHanders.load_hander@handlers"
+   ],
+   "save_pre": 2,
+   "menu_import": 7,
+   "addons": [
+    "mmd_tools",
+    "ninesync_poc"
+   ],
+   "err": null,
+   "ok": true
+  }
+ ]
+}
