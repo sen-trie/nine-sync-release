@@ -2,7 +2,8 @@ name: Bundled release
 
 # Manual only. Builds the combined NineSync extension from the commits pinned by this repository's submodules,
 # validates it, and (only when asked, and only after every owner gate is true) creates a DRAFT GitHub release.
-# Nothing is published automatically: a draft still needs a person to publish it.
+# Nothing is published automatically: a draft still needs a person to publish it, and the GitHub Pages extension
+# repository is only updated on request, after every gate, and after approval of the `extension-repository` environment.
 on:
   workflow_dispatch:
     inputs:
@@ -30,6 +31,10 @@ on:
         description: "Tag for the draft release, e.g. v0.3.0 (required when create_draft_release is true; must not exist)"
         type: string
         default: ""
+      deploy_extension_repository:
+        description: "Add this exact validated build to the GitHub Pages extension repository (needs validation, an official Blender, all gates, and approval of the extension-repository environment)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -55,13 +60,16 @@ jobs:
         with:
           python-version: "3.12"
       - name: Check the publication inputs early
-        if: ${{ inputs.create_draft_release }}
+        if: ${{ inputs.create_draft_release || inputs.deploy_extension_repository }}
         env:
           TAG: ${{ inputs.release_tag }}
+          DRAFT: ${{ inputs.create_draft_release }}
           VALIDATE: ${{ inputs.run_validation }}
+          BLENDER_URL: ${{ inputs.blender_url }}
         run: |
-          [ -n "$TAG" ] || { echo "release_tag is required for a draft release" >&2; exit 1; }
-          [ "$VALIDATE" = "true" ] || { echo "a draft release needs run_validation" >&2; exit 1; }
+          [ "$DRAFT" != "true" ] || [ -n "$TAG" ] || { echo "release_tag is required for a draft release" >&2; exit 1; }
+          [ "$VALIDATE" = "true" ] || { echo "publication needs run_validation" >&2; exit 1; }
+          [ -z "$BLENDER_URL" ] || { echo "publication needs an official Blender release, not blender_url" >&2; exit 1; }
       - name: Show pinned sources
         run: git submodule status
       - name: Build
@@ -167,3 +175,102 @@ jobs:
             --notes "Draft. Built from ${GITHUB_SHA} with the submodule pins and dependency lock in this commit. See artifact-manifest.json for commits, dependency versions and checksums." \
             dist/nine-sync-*-blender-extensions.zip dist/nine-sync-*-blender-extensions.zip.sha256 \
             dist/artifact-manifest.json dist/static-validation.json dist/blender-validation.json
+
+  # --- Self-hosted Blender extension repository (GitHub Pages) -------------------------------------------------
+  # Adds the exact ZIP that passed every gate above to the repository served at the Pages URL, so Blender can
+  # install and update NineSync natively. Manual input, same gates as the draft release, plus a person must approve
+  # the `extension-repository` environment. Experimental builds never reach this workflow.
+  assemble-repository:
+    name: Assemble extension repository
+    needs: [build, validate]
+    if: ${{ inputs.deploy_extension_repository && needs.validate.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: extension-repository # configure required reviewers on this environment for a manual approval step
+    outputs:
+      base_url: ${{ steps.url.outputs.base_url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: bundled-extension
+          path: dist
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: blender-validation
+          path: dist
+      - name: Publication gates
+        run: python -I packaging/check_publish_gates.py --dist dist --validation dist/blender-validation.json --static dist/static-validation.json
+      - name: Repository URL
+        id: url
+        env:
+          OVERRIDE: ${{ vars.EXTENSION_REPO_URL }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+        run: |
+          # Default project-page URL; set the EXTENSION_REPO_URL repository variable for a custom domain.
+          url="${OVERRIDE:-https://$(echo "$OWNER" | tr '[:upper:]' '[:lower:]').github.io/$REPO/}"
+          echo "base_url=$url" >> "$GITHUB_OUTPUT"
+          echo "Extension repository: ${url}index.json"
+      - name: Blender runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libxkbcommon0 libsm6 libegl1
+      - name: Fetch official Blender
+        id: blender
+        env:
+          BLENDER_VERSION: ${{ inputs.blender_version }}
+        run: |
+          exe=$(python -I packaging/fetch_blender.py --version "$BLENDER_VERSION" --dest build/blender)
+          [ "$(cat build/blender/official.txt)" = "true" ] || { echo "official Blender required" >&2; exit 1; }
+          echo "exe=$exe" >> "$GITHUB_OUTPUT"
+      - name: Generate the repository with Blender's server-generate
+        env:
+          BASE_URL: ${{ steps.url.outputs.base_url }}
+          BLENDER_EXE: ${{ steps.blender.outputs.exe }}
+        run: |
+          python -I packaging/extension_repo.py assemble --zip dist/nine-sync-*-blender-extensions.zip \
+            --artifact-manifest dist/artifact-manifest.json --base-url "$BASE_URL" --blender "$BLENDER_EXE" --out site
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site/
+
+  deploy-repository:
+    name: Deploy to GitHub Pages
+    needs: assemble-repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ needs.assemble-repository.outputs.base_url }}index.json
+    steps:
+      - uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  verify-repository:
+    name: Verify the public repository
+    needs: [build, assemble-repository, deploy-repository]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: bundled-extension
+          path: dist
+      - name: index.json and ZIP are served and match the release ZIP
+        env:
+          BASE_URL: ${{ needs.assemble-repository.outputs.base_url }}
+        run: python -I packaging/extension_repo.py verify --zip dist/nine-sync-*-blender-extensions.zip --base-url "$BASE_URL"

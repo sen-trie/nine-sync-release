@@ -7,6 +7,18 @@ Packaging, dependency integration, validation and release tooling for NineSync, 
 
 No release has been published yet.
 
+## Installing and updating in Blender
+
+NineSync is distributed as a self-hosted Blender extension repository on GitHub Pages, generated with Blender's own `extension server-generate`. Once a stable release has been deployed:
+
+1. Blender 5.3 or newer: Preferences > Get Extensions > Repositories (the dropdown at the top right) > **Add Remote Repository**.
+2. URL: `https://sen-trie.github.io/nine-sync-release/index.json`. Keep "Check for Updates on Startup" on if you want update notices.
+3. Install **NineSync** from that repository. Updates appear through Blender's normal extension update flow.
+
+From a terminal: `blender --command extension repo-add --name nine_sync --url https://sen-trie.github.io/nine-sync-release/index.json`, then `blender --command extension install --enable ninesync_bundled`.
+
+The same ZIPs are attached to GitHub Releases (with `.sha256`, `artifact-manifest.json` and validation reports) and can be installed with "Install from Disk". The repository only ever lists stable releases that passed every release gate; experimental pre-releases are GitHub pre-releases only. Until the first deployment the URL above returns 404.
+
 ### Installation Compatibility
 
 NineSync supports two configurations:
@@ -28,7 +40,7 @@ python -I packaging/validate_bundle.py dist/nine-sync-<version>-blender-extensio
 python -I packaging/validate_in_blender.py --blender <blender 5.3+> --zip dist/<zip> --report dist/blender-validation.json
 ```
 
-CI: Actions > "Bundled release" > Run workflow. It builds, validates statically, validates inside an official Blender 5.3 or newer, and only on request creates a **draft** release once every owner gate in `packaging/release_gates.json` is true. Nothing is published automatically.
+CI: Actions > "Bundled release" > Run workflow. It builds, validates statically, validates inside an official Blender 5.3 or newer, and only on request creates a **draft** release and/or adds the build to the GitHub Pages extension repository, once every owner gate in `packaging/release_gates.json` is true and a reviewer approves the matching environment. Nothing is published automatically.
 
 ## Licence
 
