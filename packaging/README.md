@@ -12,6 +12,7 @@ Scripts that build and check the combined NineSync Blender extension. Standard l
 | `check_experimental.py`, `experimental_notes.py` | Experimental pre-release checks and notes (no Blender run) |
 | `extension_repo.py` | Assembles the GitHub Pages extension repository (Blender `extension server-generate`) and verifies the public index and ZIP |
 | `release_gates.json` | Owner confirmations required for stable releases |
+| `update_components.py`, `components.json`, `COMPONENT_UPDATES.md` | Rolling Core + FX dependency PR (never merges or releases); see `COMPONENT_UPDATES.md` |
 
 ## Stable release (`.github/workflows/release.yml`)
 

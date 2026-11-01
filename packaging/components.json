@@ -1,0 +1,11 @@
+{
+  "_comment": "Approved component sources for the rolling dependency-update PR. Release notifications are only a hint: everything is re-resolved from these repositories through the GitHub API.",
+  "branch": "automation/update-components",
+  "title": "chore: Update NineSync Core and FX",
+  "marker": "NineSync-Automation: update-components",
+  "bundle_manifest": "packaging/bundle/blender_manifest.toml",
+  "components": {
+    "core": {"repository": "sen-trie/nine-sync-core", "path": "nine-sync-core", "label": "Core"},
+    "fx": {"repository": "sen-trie/nine-sync-fx", "path": "nine-sync-fx", "label": "FX"}
+  }
+}

@@ -1,0 +1,60 @@
+name: Update components
+
+# Maintains ONE rolling pull request (branch automation/update-components) that moves the pinned Core and FX
+# submodules to the newest stable releases. It never merges, tags, releases or deploys; merging the PR only changes
+# the pins, and Bundled releases stay with the manually dispatched, separately approved release.yml.
+#
+# The notification is only a trigger. packaging/update_components.py verifies it against the approved repositories
+# and then re-resolves the latest stable release of BOTH components, so duplicated, delayed or out-of-order
+# notifications cannot downgrade anything or lose a component's update.
+on:
+  repository_dispatch:
+    types: [component_released]
+  workflow_dispatch: {}  # re-check both components without a notification
+
+permissions: {}
+
+# One run at a time; queued runs wait instead of being cancelled. (GitHub keeps at most one pending run, but every
+# run resolves the newest release of both components itself, so a replaced pending run loses nothing.)
+concurrency:
+  group: update-components
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Update the rolling PR
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      # Default-branch code only: repository_dispatch always runs there.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      # A GitHub App installation token, not GITHUB_TOKEN: pushes and PRs made with GITHUB_TOKEN do not start the PR
+      # validation workflow, so required checks would never run. Scoped to this repository and to the two permissions
+      # needed. (Components are public. If they ever become private, install the app on them with Contents: read
+      # and add them to `repositories`.)
+      - name: Create the app token
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.COMPONENT_UPDATE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.COMPONENT_UPDATE_APP_PRIVATE_KEY }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-pull-requests: write
+      - name: Update the branch and pull request
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          EVENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          payload=""
+          [ "$EVENT_NAME" = "repository_dispatch" ] && payload="$EVENT_PAYLOAD"
+          python -I packaging/update_components.py update --event-json "$payload"

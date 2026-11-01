@@ -1,0 +1,135 @@
+name: PR validation
+
+# Runs on every pull request (including every update of the rolling component PR) against the exact PR head commit.
+# Read-only: it builds and validates the combined extension from the pinned submodules, exactly as release.yml does,
+# but publishes nothing and has no access to secrets or environments. Make the `PR validation result` check required.
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  unit:
+    name: Packaging unit tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - run: |
+          python -I packaging/test_update_components.py -v
+          python -I packaging/test_release_notes.py -v
+
+  build:
+    name: Build and statically validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: recursive
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: The tested commit is the latest PR commit
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          [ "$(git rev-parse HEAD)" = "$HEAD_SHA" ] || { echo "checked out $(git rev-parse HEAD), expected $HEAD_SHA" >&2; exit 1; }
+          echo "Testing PR head $HEAD_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - name: Show pinned sources
+        run: git submodule status
+      - name: Pins changed by the component PR are stable releases
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'automation/update-components' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: python -I packaging/update_components.py verify-pins --base "origin/$BASE_REF"
+      - name: Build
+        run: python -I packaging/build_bundle.py --out dist --staging build/staging --cache build/downloads
+      - name: Static validation
+        run: python -I packaging/validate_bundle.py dist/nine-sync-*-blender-extensions.zip --report dist/static-validation.json
+      - name: Checksum
+        run: cd dist && sha256sum -c nine-sync-*-blender-extensions.zip.sha256
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: pr-bundled-extension
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  validate:
+    name: Validate in Blender
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: pr-bundled-extension
+          path: dist
+      - name: Blender runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libxkbcommon0 libsm6 libegl1
+      - name: Fetch Blender
+        id: blender
+        run: |
+          exe=$(python -I packaging/fetch_blender.py --version 5.3.0 --dest build/blender)
+          echo "exe=$exe" >> "$GITHUB_OUTPUT"
+          echo "official=$(cat build/blender/official.txt)" >> "$GITHUB_OUTPUT"
+      - name: Validate the ZIP in an isolated profile
+        env:
+          BLENDER_EXE: ${{ steps.blender.outputs.exe }}
+          OFFICIAL: ${{ steps.blender.outputs.official }}
+        run: |
+          flag=""
+          [ "$OFFICIAL" = "true" ] && flag="--official"
+          python -I packaging/validate_in_blender.py --blender "$BLENDER_EXE" \
+            --zip dist/nine-sync-*-blender-extensions.zip --report dist/blender-validation.json $flag
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ always() }}
+        with:
+          name: pr-blender-validation
+          path: dist/blender-validation.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  result:
+    name: PR validation result
+    needs: [unit, build, validate]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Every job must have succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "job results: $RESULTS"
+          for r in $RESULTS; do [ "$r" = "success" ] || { echo "a required job did not succeed" >&2; exit 1; }; done
