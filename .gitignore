@@ -4,3 +4,7 @@ staging/
 .poc/
 __pycache__/
 *.pyc
+CLAUDE.md
+.profiles/
+poc/ext/ninesync_poc/third_party/mmd_tools/
+poc/ext_standalone/
