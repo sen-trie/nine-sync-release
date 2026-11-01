@@ -1,0 +1,6 @@
+[submodule "nine-sync-core"]
+	path = nine-sync-core
+	url = https://github.com/sen-trie/nine-sync.git
+[submodule "nine-sync-fx"]
+	path = nine-sync-fx
+	url = https://github.com/sen-trie/nine-sync-fx.git

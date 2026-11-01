@@ -1,0 +1,6 @@
+dist/
+build/
+staging/
+.poc/
+__pycache__/
+*.pyc
