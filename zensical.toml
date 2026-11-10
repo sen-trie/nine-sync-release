@@ -4,24 +4,32 @@ site_description = "Guides and manuals for NineSync, the MMD-to-Blender extensio
 docs_dir = "docs"
 site_dir = "site"
 site_url = "https://ninesync-docs.sentrie.workers.dev/"
+extra_css = ["assets/extra.css"]
+extra_javascript = ["assets/nav-open.js"]
 nav = [
   { "Home" = "index.md" },
   { "Installation" = "installation.md" },
   { "Motivation" = "motivation.md" },
+  { "Disclaimer" = "disclaimer.md" },
   { "Manual" = [
-    { "Overview" = "manual/index.md" },
-    { "Core — PMM Bridge" = [
-      { "PMM Create" = "manual/core/pmm-create.md" },
-      { "PMM Sync" = "manual/core/pmm-sync.md" },
-      { "Rigify Remap" = "manual/core/rigify-remap.md" },
-    ] },
-    { "FX — FX Importer" = [
-      { "Import" = "manual/fx/import.md" },
-      { "Geometry Nodes Setup" = "manual/fx/geometry-nodes.md" },
-      { "Shader Nodes Setup" = "manual/fx/shader-nodes.md" },
-    ] },
+    "manual/index.md",
+    { "PMM Create" = "manual/core/pmm-create.md" },
+    { "PMM Sync" = "manual/core/pmm-sync.md" },
+    { "Rigify Remap" = "manual/core/rigify-remap.md" },
+    { "FX Import" = "manual/fx/import.md" },
+    { "Geometry Nodes Setup" = "manual/fx/geometry-nodes.md" },
+    { "Shader Nodes Setup" = "manual/fx/shader-nodes.md" },
   ] },
   { "FAQ" = "faq.md" },
   { "Contributors Wanted" = "contributors.md" },
   { "Credits" = "credits.md" },
 ]
+
+[project.theme]
+variant = "modern"
+features = ["navigation.expand", "navigation.indexes"]
+
+[[project.theme.palette]]
+scheme = "slate"
+primary = "light blue"
+accent = "cyan"

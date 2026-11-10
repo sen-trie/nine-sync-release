@@ -10,7 +10,7 @@ No credit is needed for artwork or animations made with NineSync. If you want to
 Absolutely. Please share reproducible steps and example files when their licenses permit it. See [Contributors Wanted](contributors.md).
 
 **Was AI used to develop NineSync?**
-Yes. AI was used extensively during development. As a Blender animator and a NineSync user, I put significant effort into testing, refining and polishing its usability. The goal is a tool that artists can understand and actually work with.
+Yes. AI was used extensively during development. As a Blender animator and a NineSync user, I put significant effort into testing, refining and polishing its usability. The goal is a tool that artists can understand and actually work with. See the [Disclaimer](disclaimer.md).
 
 **Does NineSync replace mmd_tools?**
 No. Install and enable [mmd_tools](https://extensions.blender.org/add-ons/mmd-tools/) separately.
