@@ -1,0 +1,27 @@
+[project]
+site_name = "NineSync Documentation"
+site_description = "Guides and manuals for NineSync, the MMD-to-Blender extension"
+docs_dir = "docs"
+site_dir = "site"
+# Set site_url to the verified Cloudflare Pages URL after the first deploy.
+nav = [
+  { "Home" = "index.md" },
+  { "Installation" = "installation.md" },
+  { "Motivation" = "motivation.md" },
+  { "Manual" = [
+    { "Overview" = "manual/index.md" },
+    { "Core — PMM Bridge" = [
+      { "PMM Create" = "manual/core/pmm-create.md" },
+      { "PMM Sync" = "manual/core/pmm-sync.md" },
+      { "Rigify Remap" = "manual/core/rigify-remap.md" },
+    ] },
+    { "FX — FX Importer" = [
+      { "Import" = "manual/fx/import.md" },
+      { "Geometry Nodes Setup" = "manual/fx/geometry-nodes.md" },
+      { "Shader Nodes Setup" = "manual/fx/shader-nodes.md" },
+    ] },
+  ] },
+  { "FAQ" = "faq.md" },
+  { "Contributors Wanted" = "contributors.md" },
+  { "Credits" = "credits.md" },
+]
