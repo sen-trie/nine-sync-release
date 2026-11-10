@@ -20,7 +20,7 @@ Report problems on the [issue tracker](https://github.com/sen-trie/nine-sync-rel
 
 ## How reports are handled
 
-1. **New:** reports start with `needs-triage`.
+1. **New:** every report is labelled `needs-triage` automatically, even if it skipped the template.
 2. **Triaged:** the report is labelled `core`, `fx` or `packaging`, and asked for missing details if needed.
 3. **Reproduced:** the cause is confirmed. Component bugs are tracked in Core or FX and linked back here as `needs-upstream`.
 4. **Fixed:** the fix lands in Core or FX and is marked `fixed-in-submodule`.

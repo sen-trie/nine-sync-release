@@ -20,13 +20,10 @@ body:
   - type: dropdown
     id: install
     attributes:
-      label: How did you install NineSync?
+      label: How did you enable NineSync?
       options:
-        - Combined extension (nine-sync, from Blender Extensions or the combined ZIP)
-        - Standalone Core ZIP
-        - Standalone FX ZIP
-        - Both standalone Core and FX
-        - Combined and a standalone copy together
+        - Combined extension
+        - Separate (standalone Core and/or FX)
     validations:
       required: true
   - type: input
@@ -47,7 +44,7 @@ body:
   - type: input
     id: mmd_tools
     attributes:
-      label: mmd_tools version (if installed separately)
+      label: mmd_tools version
   - type: textarea
     id: steps
     attributes:
@@ -67,18 +64,10 @@ body:
     id: logs
     attributes:
       label: Console output or error text
-      description: Window > Toggle System Console (Windows) or launch Blender from a terminal. Remove personal paths.
+      description: Window > Toggle System Console (Windows).
       render: text
   - type: textarea
     id: files
     attributes:
       label: Sample files
       description: Link or attach only files whose licence allows sharing. Otherwise describe the model, effect or project.
-  - type: checkboxes
-    id: checks
-    attributes:
-      label: Checks
-      options:
-        - label: I checked the manual and FAQ.
-          required: true
-        - label: This is not caused by mmd_tools or the DirectX `.x` importer alone.
