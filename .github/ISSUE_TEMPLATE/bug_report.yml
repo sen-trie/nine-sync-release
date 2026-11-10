@@ -1,0 +1,84 @@
+name: Bug report
+description: Something in NineSync does not work as expected
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please do **not** attach PMM, PMX, VMD, `.x` or `.fx` files you do not have permission to share, and do not paste personal file paths or account names from logs.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Which part is affected?
+      options:
+        - PMM Create / PMM Sync / Rigify Remap (Core)
+        - FX Import / Geometry Nodes / Shader Nodes (FX)
+        - Installation, enabling or updating the extension
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install NineSync?
+      options:
+        - Combined extension (nine-sync, from Blender Extensions or the combined ZIP)
+        - Standalone Core ZIP
+        - Standalone FX ZIP
+        - Both standalone Core and FX
+        - Combined and a standalone copy together
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: NineSync version
+      description: Shown in Preferences > Get Extensions / Add-ons.
+      placeholder: "0.3.0"
+    validations:
+      required: true
+  - type: input
+    id: blender
+    attributes:
+      label: Blender version
+      placeholder: "5.3.0"
+    validations:
+      required: true
+  - type: input
+    id: mmd_tools
+    attributes:
+      label: mmd_tools version (if installed separately)
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual result
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console output or error text
+      description: Window > Toggle System Console (Windows) or launch Blender from a terminal. Remove personal paths.
+      render: text
+  - type: textarea
+    id: files
+    attributes:
+      label: Sample files
+      description: Link or attach only files whose licence allows sharing. Otherwise describe the model, effect or project.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I checked the manual and FAQ.
+          required: true
+        - label: This is not caused by mmd_tools or the DirectX `.x` importer alone.

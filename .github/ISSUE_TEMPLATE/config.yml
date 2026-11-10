@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation and FAQ
+    url: https://ninesync-docs.sentrie.workers.dev/
+    about: Check the manual and FAQ before opening an issue.
+  - name: mmd_tools problem (not NineSync)
+    url: https://github.com/MMD-Blender/blender_mmd_tools/issues
+    about: Bugs in PMX/VMD import or the mmd_tools UI belong to mmd_tools.

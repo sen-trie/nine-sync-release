@@ -21,6 +21,7 @@ nav = [
     { "Shader Nodes Setup" = "manual/fx/shader-nodes.md" },
   ] },
   { "FAQ" = "faq.md" },
+  { "Reporting Issues" = "triage.md" },
   { "Contributors Wanted" = "contributors.md" },
   { "Credits" = "credits.md" },
 ]

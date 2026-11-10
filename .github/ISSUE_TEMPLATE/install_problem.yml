@@ -1,0 +1,39 @@
+name: Installation or packaging problem
+description: Extension will not install, enable or update, or conflicts with another copy
+labels: ["packaging", "needs-triage"]
+body:
+  - type: dropdown
+    id: install
+    attributes:
+      label: Package you tried
+      options:
+        - Combined extension
+        - Standalone Core ZIP
+        - Standalone FX ZIP
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: NineSync version
+    validations:
+      required: true
+  - type: input
+    id: blender
+    attributes:
+      label: Blender version and OS
+      placeholder: "5.3.0, Windows 11"
+    validations:
+      required: true
+  - type: textarea
+    id: others
+    attributes:
+      label: Other NineSync, mmd_tools or `.x` importer add-ons installed
+      description: Mixed activation of combined and standalone copies is unsupported, but please list what is installed.
+  - type: textarea
+    id: error
+    attributes:
+      label: Error message or what happened
+      render: text
+    validations:
+      required: true

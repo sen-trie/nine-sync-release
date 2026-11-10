@@ -1,0 +1,31 @@
+name: Feature request
+description: Suggest an improvement or new capability
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Which part is it for?
+      options:
+        - PMM Create / PMM Sync / Rigify Remap (Core)
+        - FX Import / Geometry Nodes / Shader Nodes (FX)
+        - Packaging or installation
+        - Documentation
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the workflow or problem, not only the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Suggested approach
+  - type: markdown
+    attributes:
+      value: |
+        Screen-space and post-process effect passes are currently out of scope.
