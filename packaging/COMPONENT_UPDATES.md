@@ -33,18 +33,40 @@ releases. It is never merged automatically, and merging it never publishes anyth
 
 ## Required GitHub setup (not done by these files)
 
-**GitHub App** (preferred over a PAT): install on the Bundled repository only, with `Contents: read & write`
-and `Pull requests: read & write` (Metadata read is implicit). No Workflows, Actions or Administration permission.
-Store in the Bundled repository: variable `COMPONENT_UPDATE_APP_CLIENT_ID`, secret `COMPONENT_UPDATE_APP_PRIVATE_KEY`.
-An app token is needed because pushes and PRs made with `GITHUB_TOKEN` do not start `pr-validation.yml`.
+**One GitHub App ("NineSync Release Bot") does both jobs** (owner decision, 2026-11-10; preferred over a PAT).
+Install it on the Bundled repository only, with `Contents: read & write` and `Pull requests: read & write`
+(Metadata read is implicit). No Workflows, Actions or Administration permission. After adding a permission to an
+existing App, the installation owner must approve the change or the old permissions stay in effect.
+Using one App means a leaked key could also write PRs, not only trigger a re-check; the payload is re-verified and
+nothing merges or releases without review, so this was accepted.
+
+The two jobs read the same App through differently named settings:
+
+| Where | Setting | Value |
+| --- | --- | --- |
+| Bundled (listener) | variable `COMPONENT_UPDATE_APP_CLIENT_ID` | the App's **Client ID** (`Iv...`), not the numeric App ID |
+| Bundled (listener) | secret `COMPONENT_UPDATE_APP_PRIVATE_KEY` | the full `.pem` |
+| Core and FX (senders) | variable `BUNDLED_APP_ID` | the App's numeric **App ID** |
+| Core and FX (senders) | secret `BUNDLED_APP_PRIVATE_KEY` | the same `.pem` |
+
+Secrets are per repository, so the key is pasted into each of the three. An app token is needed (rather than
+`GITHUB_TOKEN`) because pushes and PRs made with `GITHUB_TOKEN` do not start `pr-validation.yml`.
 Core and FX are public, so reads need no extra grant. If they become private, install the app on them with
 `Contents: read` and add them to `repositories` in the workflow.
 
-**Sending the notification** (from the Core and FX release workflows, after a stable release is published): a
-credential allowed to call `POST /repos/<bundled>/dispatches`, which GitHub gates on `Contents: write` on Bundled.
-Use a second, minimal GitHub App or a fine-grained PAT limited to the Bundled repository with only that permission,
-stored as a secret in Core and FX. The payload is re-verified, so the worst a leaked credential can do is trigger a
-re-check. Ready-to-paste step: `outbox/` handoff `component_released_notification.md`.
+**Sending the notification** (the `notify-bundled` job in the Core and FX `release.yml`, after a stable release is
+published): each job checks the release is published, stable and that its tag points at the built commit, creates an
+App token limited to the Bundled repository, and calls `POST /repos/<bundled>/dispatches`, which GitHub gates on
+`Contents: write` there. The body must be exactly:
+
+```json
+{"event_type": "component_released",
+ "client_payload": {"component": "core|fx", "repository": "sen-trie/nine-sync-<core|fx>",
+                    "tag": "vX.Y.Z", "commit": "<full 40-char sha>"}}
+```
+
+(Extra fields such as `version` are ignored.) The listener rejects any other event type, key name or short sha, and
+a mismatched sender fails silently, so change both sides together.
 
 **Branch ruleset on `main`** (the only way to enforce approval and checks):
 

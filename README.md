@@ -1,55 +1,39 @@
-# NineSync release repository
+# NineSync
 
-Packaging, dependency integration, validation and release tooling for NineSync, which brings MikuMikuDance projects, accessories and MME effects into Blender 5.3 or newer. The two add-ons are developed in their own repositories and pinned here as submodules:
+NineSync brings MikuMikuDance (MMD) projects into Blender. Import and sync PMM projects, including model animations, morphs, cameras, lighting, audio, accessories and MME effects.
 
-- [NineSync: PMM Bridge (Core)](https://github.com/sen-trie/nine-sync-core)
-- [NineSync: FX Importer (FX)](https://github.com/sen-trie/nine-sync-fx)
+## Project Scope
 
-No release has been published yet.
+NineSync is a single extension with functionality developed across two components:
 
-## Installing and updating in Blender
+- **Core — [PMM Bridge](https://github.com/sen-trie/nine-sync-core):** Syncs MMD projects, animations, morphs, cameras, lighting and audio.
+- **FX — [FX Importer](https://github.com/sen-trie/nine-sync-fx):** Imports `.x` accessories and applies supported `.fx` effects.
 
-NineSync is distributed as a self-hosted Blender extension repository on GitHub Pages, generated with Blender's own `extension server-generate`. Once a stable release has been deployed:
+## Requirements
 
-1. Blender 5.3 or newer: Preferences > Get Extensions > Repositories (the dropdown at the top right) > **Add Remote Repository**.
-2. URL: `https://sen-trie.github.io/nine-sync-release/index.json`. Keep "Check for Updates on Startup" on if you want update notices.
-3. Install **NineSync** from that repository. Updates appear through Blender's normal extension update flow.
+- Blender 5.3+
+- [mmd_tools](https://extensions.blender.org/add-ons/mmd-tools/) 4.5.5+ (install and enable it in Blender)
 
-From a terminal: `blender --command extension repo-add --name nine_sync --url https://sen-trie.github.io/nine-sync-release/index.json`, then `blender --command extension install --enable ninesync_bundled`.
+## Installation
 
-The same ZIPs are attached to GitHub Releases (with `.sha256`, `artifact-manifest.json` and validation reports) and can be installed with "Install from Disk". The repository only ever lists stable releases that passed every release gate; experimental pre-releases are GitHub pre-releases only. Until the first deployment the URL above returns 404.
+1. In Blender, open **Edit > Preferences > Get Extensions**.
+2. Open the repositories menu and choose **Add Remote Repository**.
+3. Enter `https://sen-trie.github.io/nine-sync-release/index.json`.
+4. Find and install **NineSync**.
 
-### Installation Compatibility
+Alternatively, download the NineSync ZIP from [GitHub Releases](https://github.com/sen-trie/nine-sync-release/releases) and use **Install from Disk** in Blender's extension preferences.
 
-NineSync supports two configurations:
+Install the combined extension **or** the two standalone add-ons, not both at once.
 
-1. **Standalone:** NineSync Core and FX enabled separately, with their required dependencies.
-2. **Combined:** The combined NineSync release, which contains Core and FX.
+## Getting started
 
-Both configurations may be installed together, but **simultaneous activation is unsupported** and may cause conflicts or unexpected behavior. The combined extension refuses to start while standalone Core or FX is registered; it never disables another extension.
+1. Open Blender's **3D Viewport** and press **N** to show the sidebar.
+2. Select the **NineSync** tab.
+3. Choose your MMD `.pmm` project and set up the models you want to sync.
+4. Click **Sync Now** to import or update the project.
 
-Disable one configuration before enabling the other. Restarting Blender when switching is recommended.
+You can also import `.x` accessories directly with **File > Import > MMD Accessory (.x)**.
 
-### Required: mmd_tools (install it yourself)
+## License
 
-NineSync does **not** include mmd_tools, in either configuration. Install and enable the separate [mmd_tools](https://extensions.blender.org/add-ons/mmd-tools/) extension, **version 4.5.5 or newer**, from the Blender extensions platform. NineSync only calls it: it never installs, updates, replaces or unregisters mmd_tools, and enabling or disabling NineSync leaves mmd_tools untouched.
-
-If mmd_tools is missing, disabled or too old, NineSync still loads and its panel shows a notice saying which; syncing stays unavailable until you fix it. Enable order does not matter. The combined extension also needs no `.x` importer add-on (it carries its own import-only copy); the standalone FX add-on treats the DirectX X Importer as optional.
-
-## Building the bundled extension
-
-Local (needs a clean tree, network for the pinned dependency archives):
-
-```
-python -I packaging/build_bundle.py
-python -I packaging/validate_bundle.py dist/nine-sync-<version>-blender-extensions.zip
-python -I packaging/validate_in_blender.py --blender <blender 5.3+> --zip dist/<zip> --report dist/blender-validation.json
-```
-
-`validate_in_blender.py` installs the pinned mmd_tools from `packaging/test_fixtures.lock` into its throwaway profile as the external dependency. That fixture is test-only and never enters the ZIP.
-
-CI: Actions > "Bundled release" > Run workflow. It builds, validates statically, validates inside an official Blender 5.3 or newer, and only on request creates a **draft** release and/or adds the build to the GitHub Pages extension repository, once every owner gate in `packaging/release_gates.json` is true and a reviewer approves the matching environment. Nothing is published automatically.
-
-## Licence
-
-NineSync is GPL-3.0-or-later. Bundled third-party components (the DirectX `.x` importer) keep their own licences; see `THIRD_PARTY_NOTICES.md` in the combined ZIP. mmd_tools is not bundled.
+GPL-3.0-or-later. See `LICENSE`.
