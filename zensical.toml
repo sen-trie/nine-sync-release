@@ -3,7 +3,7 @@ site_name = "NineSync Documentation"
 site_description = "Guides and manuals for NineSync, the MMD-to-Blender extension"
 docs_dir = "docs"
 site_dir = "site"
-# Set site_url to the verified Cloudflare Pages URL after the first deploy.
+site_url = "https://ninesync-docs.sentrie.workers.dev/"
 nav = [
   { "Home" = "index.md" },
   { "Installation" = "installation.md" },

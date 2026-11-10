@@ -34,6 +34,12 @@ Install the combined extension **or** the two standalone add-ons, not both at on
 
 You can also import `.x` accessories directly with **File > Import > MMD Accessory (.x)**.
 
+## Documentation
+
+Guides and manuals: [ninesync-docs.sentrie.workers.dev](https://ninesync-docs.sentrie.workers.dev/)
+
+Check the wiki for more details.
+
 ## License
 
 GPL-3.0-or-later. See `LICENSE`.
