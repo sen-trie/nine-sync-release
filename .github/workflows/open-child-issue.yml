@@ -1,0 +1,65 @@
+name: Open child issue
+
+# When a maintainer adds the core or fx label to an issue here, open a linked maintainer issue in
+# nine-sync-core or nine-sync-fx, comment its link on this issue and add needs-upstream. Runs once per
+# issue and component: the child issue carries a hidden marker that is searched for first.
+#
+# Needs the repository secret CHILD_ISSUES_TOKEN: a fine-grained personal access token (or app token) of
+# the repository owner with "Issues: read and write" on nine-sync-core and nine-sync-fx only.
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  issues: write
+
+jobs:
+  open:
+    if: github.event.label.name == 'core' || github.event.label.name == 'fx'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open linked issue
+        env:
+          CHILD_TOKEN: ${{ secrets.CHILD_ISSUES_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          COMPONENT: ${{ github.event.label.name }}
+          ISSUE: ${{ github.event.issue.number }}
+          TITLE: ${{ github.event.issue.title }}
+          URL: ${{ github.event.issue.html_url }}
+          REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          if [ -z "$CHILD_TOKEN" ]; then
+            echo "::error::Secret CHILD_ISSUES_TOKEN is not set; open the $COMPONENT issue by hand."
+            exit 1
+          fi
+          case "$COMPONENT" in
+            core) CHILD="$OWNER/nine-sync-core" ;;
+            fx) CHILD="$OWNER/nine-sync-fx" ;;
+          esac
+          MARKER="<!-- release-issue:$REPO#$ISSUE -->"
+
+          existing=$(GH_TOKEN="$CHILD_TOKEN" gh issue list --repo "$CHILD" --state all \
+            --search "\"release-issue:$REPO#$ISSUE\" in:body" --json number --jq 'length')
+          if [ "$existing" != "0" ]; then
+            echo "A linked issue already exists in $CHILD; nothing to do."
+            exit 0
+          fi
+
+          {
+            echo "$MARKER"
+            echo "### Release tracker issue"
+            echo
+            echo "$URL"
+            echo
+            echo "### Summary"
+            echo
+            echo "Opened automatically from the release tracker issue above. Add the confirmed cause and reproduction here."
+          } > body.md
+
+          child_url=$(GH_TOKEN="$CHILD_TOKEN" gh issue create --repo "$CHILD" \
+            --title "[release#$ISSUE] $TITLE" --body-file body.md)
+
+          gh issue comment "$ISSUE" --repo "$REPO" --body "Tracked in $child_url"
+          gh issue edit "$ISSUE" --repo "$REPO" --add-label needs-upstream
