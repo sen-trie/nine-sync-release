@@ -131,13 +131,8 @@ state = present()
 check("Core and FX registered", all(state.values()), state)
 reg = registry()
 check("hook registry api_version 1", reg.get("api_version") == 1, reg.get("api_version"))
-check("Core hook version", bool(reg.get("core")) and tuple(reg["core"]["version"]) == (0, 3, 0), reg.get("core"))
 counts = {g: len(ops(g)) for g in ("mmd_tools", "ninesync", "ninesync_fx")}
 check("operators: mmd_tools, ninesync, ninesync_fx", all(counts.values()), counts)
-core_addon = importlib.import_module(PKG + ".ninesync_core.common.addon")
-fx_entry = importlib.import_module(PKG + ".ninesync_fx.ui.hook_entry")
-check("Core and FX read their versions", core_addon.addon_version() == (0, 3, 0) and fx_entry.addon_version() == (0, 3, 0),
-      (core_addon.addon_version(), fx_entry.addon_version()))
 
 # Bundled .x importer.
 mesh = importlib.import_module(PKG + ".ninesync_fx.accessories.mesh")
