@@ -51,7 +51,7 @@ For the first bundled prerelease, e.g. `v0.1.0-alpha.1`. Manual dispatch only.
    settings: that approval is the explicit manual step. The release is created as a **Pre-release** whose notes
    say the extension is not validated in Blender. An existing tag is never touched.
 6. The tag is only a label: the extension inside the ZIP keeps the version in `bundle/blender_manifest.toml`
-   (currently 0.3.0, matching Core and FX).
+   (currently 0.1.0; see `VERSIONING.md`).
 
 Stable releases must not use prerelease tags; promote only through `release.yml`. Experimental builds never enter the
 GitHub Pages extension repository: this workflow has no deployment job and `extension_repo.py` rejects non-`X.Y.Z` versions.

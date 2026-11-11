@@ -20,7 +20,7 @@ on:
         type: boolean
         default: false
       release_tag:
-        description: "Tag for the draft release, e.g. v0.3.0 (required when create_draft_release is true; must not exist)"
+        description: "Tag for the draft release, e.g. v0.1.0 (required when create_draft_release is true; must not exist)"
         type: string
         default: ""
       deploy_extension_repository:

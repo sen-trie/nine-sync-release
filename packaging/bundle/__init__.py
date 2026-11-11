@@ -9,7 +9,7 @@
 # registrations before it registers anything and refuses to start (fail closed); it never disables
 # or changes another add-on.
 
-BUNDLE_VERSION = (0, 3, 0)
+BUNDLE_VERSION = (0, 1, 0)
 
 # FX reads its root package's bl_info["version"] (here: this package). Blender drops the attribute from an
 # enabled extension's module, so it is set again at register time.

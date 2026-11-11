@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "ninesync_bundled"
-version = "0.3.0"
+version = "0.1.0"
 name = "NineSync"
 tagline = "MikuMikuDance projects, accessories and MME effects"
 maintainer = "sentrie"

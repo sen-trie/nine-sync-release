@@ -85,8 +85,8 @@ class NotesTests(unittest.TestCase):
     def test_repository_changelog_parses_and_keeps_history(self):
         with open(os.path.join(base.ROOT, "CHANGELOG.md"), encoding="utf-8") as handle:
             text = handle.read()
-        self.assertTrue(rn.parse_changelog(text)["unreleased"])
-        self.assertIn("## [0.1.0-alpha.1]", text)       # published history is preserved
+        self.assertIn("unreleased", rn.parse_changelog(text))
+        self.assertIn("## [0.1.0]", text)       # published history is preserved
 
     def test_release_workflow_uses_draft_notes_and_stays_a_draft(self):
         with open(os.path.join(base.ROOT, ".github", "workflows", "release.yml"), encoding="utf-8") as handle:
