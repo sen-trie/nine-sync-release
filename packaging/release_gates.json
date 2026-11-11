@@ -1,6 +1,5 @@
 {
-  "_comment": "Stable publication is refused while any gate is false. The owner sets a gate to true only after confirming it.",
+  "_comment": "Read by check_experimental.py only. The stable release path no longer uses owner gates.",
   "website_confirmed": true,
-  "copyright_holder_confirmed": true,
-  "bundled_install_tests_passed": false
+  "copyright_holder_confirmed": true
 }

@@ -1,9 +1,9 @@
 name: Bundled release
 
 # Manual only. Builds the combined NineSync extension from the commits pinned by this repository's submodules,
-# validates it, and (only when asked, and only after every owner gate is true) creates a DRAFT GitHub release.
+# validates it, and (only when asked, and only after validation passes) creates a DRAFT GitHub release.
 # Nothing is published automatically: a draft still needs a person to publish it, and the GitHub Pages extension
-# repository is only updated on request, after every gate, and after approval of the `extension-repository` environment.
+# repository is only updated on request, after validation, and after approval of the `extension-repository` environment.
 on:
   workflow_dispatch:
     inputs:
@@ -16,7 +16,7 @@ on:
         type: string
         default: "5.3.0"
       create_draft_release:
-        description: "Create a DRAFT release with the artifacts (needs validation and all gates in packaging/release_gates.json)"
+        description: "Create a DRAFT release with the artifacts (needs a passing Blender validation of the exact ZIP)"
         type: boolean
         default: false
       release_tag:

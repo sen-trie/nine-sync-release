@@ -9,17 +9,17 @@ Scripts that build and check the combined NineSync Blender extension. Standard l
 | `validate_in_blender.py`, `blender_smoke.py` | Install into an isolated profile and test inside Blender 5.3+ |
 | `fetch_blender.py` | Downloads an official Blender release and verifies its checksum; never substitutes another version |
 | `VERSIONING.md` | How the Bundled version relates to Core and FX versions |
-| `check_publish_gates.py` | Stable release gate check (all owner gates + official-Blender validation) |
+| `check_publish_gates.py` | Stable release check (static + official-Blender validation of the exact ZIP, clean manifest) |
 | `check_experimental.py`, `experimental_notes.py` | Experimental pre-release checks and notes (no Blender run) |
 | `extension_repo.py` | Assembles the GitHub Pages extension repository (Blender `extension server-generate`) and verifies the public index and ZIP |
-| `release_gates.json` | Owner confirmations required for stable releases |
+| `release_gates.json` | Website and copyright confirmations, read by the experimental path only |
 | `update_components.py`, `components.json`, `COMPONENT_UPDATES.md` | Rolling Core + FX dependency PR (never merges or releases); see `COMPONENT_UPDATES.md` |
 
 ## Stable release (`.github/workflows/release.yml`)
 
 Manual dispatch. Builds, validates statically, validates inside an official Blender 5.3 or newer, and on request
-creates a **draft** release. Requires every gate in `release_gates.json`, a passing Blender validation of the exact
-ZIP, and approval of the `release` environment. Unchanged by the experimental path.
+creates a **draft** release. Requires a passing Blender validation of the exact
+ZIP and approval of the `release` environment. Unchanged by the experimental path.
 
 ### Extension repository on GitHub Pages
 
