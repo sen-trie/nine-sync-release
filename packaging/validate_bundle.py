@@ -120,7 +120,6 @@ def main(argv=None):
     rep.check("versions: Core, FX and bundle found", None not in (core_v, fx_v, bundle_v, man_v), str((core_v, fx_v, bundle_v, man_v)))
     if None not in (core_v, fx_v, bundle_v, man_v):
         rep.check("versions: manifest == BUNDLE_VERSION", man_v == bundle_v)
-        rep.check("versions: Core and FX share major.minor with the bundle", core_v[:2] == fx_v[:2] == man_v[:2], str((core_v, fx_v, man_v)))
     rep.check("versions: bl_info follows ADDON_VERSION in components",
               all(re.search(r'"version":\s*ADDON_VERSION', data.get(p, b"").decode("utf-8")) for p in
                   ("ninesync_core/__init__.py", "ninesync_fx/__init__.py")))

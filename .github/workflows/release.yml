@@ -15,16 +15,8 @@ on:
         description: "Official Blender release to validate with (must be 5.3.0 or newer and exist on download.blender.org)"
         type: string
         default: "5.3.0"
-      blender_url:
-        description: "Optional: explicit Linux x64 tar.xz for a pre-release build (needs blender_sha256). Never counts as official."
-        type: string
-        default: ""
-      blender_sha256:
-        description: "SHA-256 of blender_url"
-        type: string
-        default: ""
       create_draft_release:
-        description: "Create a DRAFT release with the artifacts (needs validation, an official Blender, and all gates in packaging/release_gates.json)"
+        description: "Create a DRAFT release with the artifacts (needs validation and all gates in packaging/release_gates.json)"
         type: boolean
         default: false
       release_tag:
@@ -65,11 +57,9 @@ jobs:
           TAG: ${{ inputs.release_tag }}
           DRAFT: ${{ inputs.create_draft_release }}
           VALIDATE: ${{ inputs.run_validation }}
-          BLENDER_URL: ${{ inputs.blender_url }}
         run: |
           [ "$DRAFT" != "true" ] || [ -n "$TAG" ] || { echo "release_tag is required for a draft release" >&2; exit 1; }
           [ "$VALIDATE" = "true" ] || { echo "publication needs run_validation" >&2; exit 1; }
-          [ -z "$BLENDER_URL" ] || { echo "publication needs an official Blender release, not blender_url" >&2; exit 1; }
       - name: Show pinned sources
         run: git submodule status
       - name: Build
@@ -110,14 +100,8 @@ jobs:
         id: blender
         env:
           BLENDER_VERSION: ${{ inputs.blender_version }}
-          BLENDER_URL: ${{ inputs.blender_url }}
-          BLENDER_SHA256: ${{ inputs.blender_sha256 }}
         run: |
-          if [ -n "$BLENDER_URL" ]; then
-            exe=$(python -I packaging/fetch_blender.py --version "$BLENDER_VERSION" --url "$BLENDER_URL" --sha256 "$BLENDER_SHA256" --dest build/blender)
-          else
-            exe=$(python -I packaging/fetch_blender.py --version "$BLENDER_VERSION" --dest build/blender)
-          fi
+          exe=$(python -I packaging/fetch_blender.py --version "$BLENDER_VERSION" --dest build/blender)
           echo "exe=$exe" >> "$GITHUB_OUTPUT"
           echo "official=$(cat build/blender/official.txt)" >> "$GITHUB_OUTPUT"
       - name: Validate the ZIP in an isolated profile

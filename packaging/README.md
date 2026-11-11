@@ -8,6 +8,7 @@ Scripts that build and check the combined NineSync Blender extension. Standard l
 | `validate_bundle.py` | Static checks (structure, manifest, versions, licences, hooks, syntax, private paths) |
 | `validate_in_blender.py`, `blender_smoke.py` | Install into an isolated profile and test inside Blender 5.3+ |
 | `fetch_blender.py` | Downloads an official Blender release and verifies its checksum; never substitutes another version |
+| `VERSIONING.md` | How the Bundled version relates to Core and FX versions |
 | `check_publish_gates.py` | Stable release gate check (all owner gates + official-Blender validation) |
 | `check_experimental.py`, `experimental_notes.py` | Experimental pre-release checks and notes (no Blender run) |
 | `extension_repo.py` | Assembles the GitHub Pages extension repository (Blender `extension server-generate`) and verifies the public index and ZIP |

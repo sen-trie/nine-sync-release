@@ -304,16 +304,6 @@ class UpdateTests(unittest.TestCase):
         self.assertEqual(self.run_update(), "current")
         self.assertEqual(self.api.writes, [])
 
-    def test_incompatible_release_keeps_last_compatible_state(self):
-        c = self.release(CORE, "0.3.1")
-        self.run_update(event(CORE, "0.3.1", c, "core"))
-        self.api.writes.clear()
-        self.release(CORE, "0.4.0")      # needs a Bundled/FX 0.4 first
-        with self.assertRaises(uc.Failure):
-            self.run_update()
-        self.assertEqual(self.pins()["nine-sync-core"], c)
-        self.assertEqual(self.api.writes, [])
-
     def test_hooks_mismatch_is_incompatible(self):
         self.release(CORE, "0.3.1", hooks=b"API_VERSION = 1\n# changed\n")
         with self.assertRaises(uc.Failure):

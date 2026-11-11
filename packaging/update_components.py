@@ -207,12 +207,8 @@ def api_version_of(hooks):
 
 
 def check_compat(api, cfg, targets, bundle_version):
-    """Same rules validate_bundle.py enforces: shared major.minor with the bundle, identical hooks.py, API version."""
+    """Same rules validate_bundle.py enforces: identical hooks.py and API version. Versions are independent (see VERSIONING.md)."""
     problems = []
-    core, fx = targets["core"], targets["fx"]
-    if not (core["version"][:2] == fx["version"][:2] == bundle_version[:2]):
-        problems.append("Core %s, FX %s and the Bundled manifest %s must share major.minor (raise the Bundled version first)"
-                        % (fmt(core["version"]), fmt(fx["version"]), fmt(bundle_version)))
     hooks = {}
     for key, tgt in targets.items():
         try:

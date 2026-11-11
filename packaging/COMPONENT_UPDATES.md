@@ -20,10 +20,9 @@ releases. It is never merged automatically, and merging it never publishes anyth
 2. The updater then resolves the latest eligible stable release of **both** components itself, so duplicate, late
    or out-of-order notifications cannot downgrade anything or drop the other component's update.
 3. A component only moves when its latest release is newer than what `main` pins.
-4. Core/FX must be compatible, using the rules `validate_bundle.py` already enforces: shared major.minor with each
-   other and with `packaging/bundle/blender_manifest.toml`, byte-identical `hooks.py`, `API_VERSION = 1`.
-   If not, the run fails, nothing is written and the last compatible state stays.
-   (A new Core/FX minor therefore needs the Bundled version raised on `main` first; that is a release decision.)
+4. Core/FX must be compatible, using the rules `validate_bundle.py` already enforces: byte-identical `hooks.py` and
+   `API_VERSION = 1`. If not, the run fails, nothing is written and the last compatible state stays.
+   Versions are not compared; the Bundled version follows its own rule (see `VERSIONING.md`).
 5. The branch is derived entirely from `main` plus the new pins and written as a single commit through the Git
    data API, so a late `main` change is picked up and nothing accumulates. Every push to the PR counts as new
    commits, which dismisses stale approvals when that repository setting is on.
