@@ -29,6 +29,9 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+# `python -I` (used by the workflow) leaves the script directory off sys.path, but `update` imports release_notes.
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
 STABLE_TAG = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)$")
 REPO_NAME = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 SHA = re.compile(r"^[0-9a-f]{40}$")

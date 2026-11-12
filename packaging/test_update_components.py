@@ -372,5 +372,15 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(cfg["branch"], "automation/update-components")
 
 
+class IsolatedModeTests(unittest.TestCase):
+    def test_sibling_import_works_under_dash_I(self):
+        """The workflow runs the script with `python -I`, which drops the script dir from sys.path."""
+        import subprocess
+        script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "update_components.py")
+        code = "import runpy; runpy.run_path(%r, run_name='probe'); import release_notes" % script
+        r = subprocess.run([sys.executable, "-I", "-c", code], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()
