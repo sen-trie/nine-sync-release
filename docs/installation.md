@@ -15,6 +15,7 @@
 
 Alternatively, download the combined extension ZIP from [NineSync Releases](https://github.com/sen-trie/nine-sync-release/releases) and install it with **Install from Disk**.
 
+<!-- prettier-ignore -->
 !!! warning "One install only"
     Use the combined NineSync extension as the normal installation. Do not install it alongside the standalone PMM Bridge and FX Importer add-ons.
 
@@ -25,5 +26,3 @@ Alternatively, download the combined extension ZIP from [NineSync Releases](http
 3. Select **Sync Now**.
 
 For accessories without a PMM, use **File > Import > MMD Accessory (.x)**.
-
-Next: [PMM Sync](manual/core/pmm-sync.md) · [Import Accessories and Effects](manual/fx/import.md)

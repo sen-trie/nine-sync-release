@@ -1,18 +1,18 @@
-# NineSync
+# ⑨-Sync
 
 NineSync brings MikuMikuDance (MMD) projects into Blender. Import and sync PMM projects, including model animations, morphs, cameras, lighting, audio, accessories and MME effects.
 
 ## Project Scope
 
-NineSync is a single extension with functionality developed across two components:
+NineSync is developed across two components:
 
-- **Core — [PMM Bridge](https://github.com/sen-trie/nine-sync-core):** Syncs MMD projects, animations, morphs, cameras, lighting and audio.
-- **FX — [FX Importer](https://github.com/sen-trie/nine-sync-fx):** Imports `.x` accessories and applies supported `.fx` effects.
+- **(Core) [PMM Bridge](https://github.com/sen-trie/nine-sync-core):** Syncs MMD projects, animations, morphs, cameras, lighting and audio.
+- **(FX) [FX Importer](https://github.com/sen-trie/nine-sync-fx):** Imports `.x` accessories and applies supported `.fx` effects.
 
 ## Requirements
 
 - Blender 5.3+
-- [mmd_tools](https://extensions.blender.org/add-ons/mmd-tools/) 4.5.5+ (install and enable it in Blender)
+- [mmd_tools](https://extensions.blender.org/add-ons/mmd-tools/) 4.5.5+
 
 ## Installation
 

@@ -29,6 +29,7 @@ nav = [
 [project.theme]
 variant = "modern"
 features = ["navigation.expand", "navigation.indexes"]
+font.text = "Nunito"
 
 [[project.theme.palette]]
 scheme = "slate"

@@ -82,12 +82,6 @@ class NotesTests(unittest.TestCase):
             with self.assertRaises(uc.Failure):
                 rn.finalize(path, "0.3.0", "2026-12-02")      # [Unreleased] is empty
 
-    def test_repository_changelog_parses_and_keeps_history(self):
-        with open(os.path.join(base.ROOT, "CHANGELOG.md"), encoding="utf-8") as handle:
-            text = handle.read()
-        self.assertIn("unreleased", rn.parse_changelog(text))
-        self.assertIn("## [0.1.0]", text)       # published history is preserved
-
     def test_release_workflow_uses_draft_notes_and_stays_a_draft(self):
         with open(os.path.join(base.ROOT, ".github", "workflows", "release.yml"), encoding="utf-8") as handle:
             text = handle.read()

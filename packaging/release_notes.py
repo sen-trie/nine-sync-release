@@ -150,9 +150,7 @@ def draft_notes(api, cfg, bundled, current, current_deps, unreleased, label, exc
             old[key] = uc.parse_tag(manifest[key]["version"]) if manifest else None
         except (KeyError, TypeError):
             old[key] = None
-    lines = ["## NineSync %s (draft)" % label, "",
-             "> Draft generated from the published Core and FX changelogs and this repository's changelog. "
-             "Review and edit it, then publish the release by hand.", ""]
+    lines = ["## NineSync %s" % label, ""]
     if release is None:
         lines += ["No earlier Bundled release was found, so there is no baseline to compare against.", ""]
     elif manifest is None:
@@ -162,12 +160,12 @@ def draft_notes(api, cfg, bundled, current, current_deps, unreleased, label, exc
                   "https://github.com/%s/releases/tag/%s" % (bundled, release["tag_name"])), ""]
     lines += ["### Components", "", "| Component | Previous | This release |", "| --- | --- | --- |"]
     for key, comp in cfg["components"].items():
-        lines.append("| %s | %s | %s |" % (comp["label"], uc.fmt(old[key]) if old[key] else "unknown", uc.fmt(current[key]["version"])))
+        lines.append("| %s | %s | %s |" % (comp["label"], uc.fmt(old[key]) if old[key] else "-", uc.fmt(current[key]["version"])))
     lines.append("")
-    lines += ["## User-facing changes", ""]
+    lines += ["## What's changed", ""]
     for key in cfg["components"]:
         lines += component_section(api, cfg, key, old[key], current[key]["version"], current[key]["commit"])
-    lines += ["## Bundled packaging, installation and integration", ""]
+    lines += ["## Packaging", ""]
     bundled_lines = ["- " + b if not b.startswith("- ") else b for b in unreleased]
     deps = dependency_changes((manifest or {}).get("dependencies", {}), current_deps) if manifest else []
     if bundled_lines or deps:
