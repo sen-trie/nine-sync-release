@@ -1,8 +1,6 @@
 # Rigify Remap
 
-## What it does
-
-For a Rigify rig converted with MMD Tools Append, carries the PMM's motion onto the Rigify controls instead of the underlying MMD bones.
+Rigify Remap transfers your PMM's motion to the controls of a Rigify rig converted with MMD Tools Append.
 
 ## Before you start
 
@@ -13,7 +11,7 @@ For a Rigify rig converted with MMD Tools Append, carries the PMM's motion onto 
 
 ## Steps
 
-1. Set up and sync the model as in [PMM Sync](pmm-sync.md).
+1. Set up and sync the model as in [PMM Sync](../pmm-sync/index.md).
 2. Open **Rigify Remap**. Each Rigify target has its own box.
 3. Keep **Rigify Remap** ticked for that model (it is on by default).
 4. Select **Show Mappings** to see which Rigify control each MMD bone drives.

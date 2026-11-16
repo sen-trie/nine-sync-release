@@ -15,7 +15,3 @@ Absolutely. Please share reproducible steps and example files when their license
 **Was AI used to develop NineSync?**
 <br/>
 Yes. AI was used extensively during development. See the [Disclaimer](disclaimer.md).
-
-**Which render engine should I use for effects?**
-<br/>
-Start with **EEVEE**. **Cycles** may work for some imported effects but may need extra shader and transparency adjustments.

@@ -4,7 +4,7 @@ Report problems on the [issue tracker](https://github.com/sen-trie/nine-sync-rel
 
 ## Before you report
 
-- Check the [manual](manual/index.md).
+- Check the [manual](manual/index.md) and [common issues](issues.md).
 - Update to the latest NineSync release.
 - Only attach files you have permission to share, and remove personal paths from logs.
 

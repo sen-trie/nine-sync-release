@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3128 490" font-family="Segoe UI, Arial, sans-serif">
+<text x="12" y="24" font-size="15" font-weight="bold" fill="#8a94a6">Generated pixel shader group: MME PS Thunder_MainTec1_Line (Shader Nodes)</text>
+<path d="M220 69 C243 69 243 69 266 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M456 69 C479 69 479 69 502 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M692 69 C715 69 715 69 738 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M220 189 C597 189 597 69 974 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M928 69 C951 69 951 69 974 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M1164 69 C1187 69 1187 69 1210 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M1400 69 C1423 69 1423 129 1446 129" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M1400 69 C1423 69 1423 69 1446 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M220 309 C951 309 951 129 1682 129" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M1636 129 C1659 129 1659 129 1682 129" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M220 369 C951 369 951 189 1682 189" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M1636 129 C1659 129 1659 189 1682 189" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M220 429 C951 429 951 249 1682 249" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M1636 129 C1659 129 1659 249 1682 249" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M1636 69 C1659 69 1659 69 1682 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M220 249 C951 249 951 69 1682 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M1872 69 C1895 69 1895 69 1918 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M220 129 C243 129 243 129 266 129" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M2108 69 C2131 69 2131 69 2154 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M456 129 C1305 129 1305 69 2154 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M2344 69 C2367 69 2367 69 2390 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M2580 69 C2603 69 2603 69 2626 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M1872 129 C1895 129 1895 129 1918 129" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M1872 189 C1895 189 1895 129 1918 129" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M1872 249 C1895 249 1895 129 1918 129" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M2108 129 C2485 129 2485 69 2862 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<path d="M2816 69 C2839 69 2839 69 2862 69" fill="none" stroke="#8a94a6" stroke-opacity="0.7" stroke-width="1.3"/>
+<rect x="30" y="46" width="190" height="46" rx="5" fill="#9fd3a8" stroke="#4b5563"/>
+<text x="37" y="63" font-size="11.5" font-weight="600" fill="#111827">Group Input</text>
+<text x="37" y="80" font-size="9" fill="#374151">NodeGroupInput</text>
+<rect x="30" y="166" width="190" height="46" rx="5" fill="#9fd3a8" stroke="#4b5563"/>
+<text x="37" y="183" font-size="11.5" font-weight="600" fill="#111827">Group Input</text>
+<text x="37" y="200" font-size="9" fill="#374151">NodeGroupInput</text>
+<rect x="30" y="226" width="190" height="46" rx="5" fill="#9fd3a8" stroke="#4b5563"/>
+<text x="37" y="243" font-size="11.5" font-weight="600" fill="#111827">Group Input</text>
+<text x="37" y="260" font-size="9" fill="#374151">NodeGroupInput</text>
+<rect x="266" y="46" width="190" height="46" rx="5" fill="#c9d1dc" stroke="#4b5563"/>
+<text x="273" y="63" font-size="11.5" font-weight="600" fill="#111827">Math</text>
+<text x="273" y="80" font-size="9" fill="#374151">Math | float4 ColA = tex2D(SampLine, IN.Tex </text>
+<rect x="502" y="46" width="190" height="46" rx="5" fill="#c9d1dc" stroke="#4b5563"/>
+<text x="509" y="63" font-size="11.5" font-weight="600" fill="#111827">Math</text>
+<text x="509" y="80" font-size="9" fill="#374151">Math | float4 ColA = tex2D(SampLine, IN.Tex </text>
+<rect x="738" y="46" width="190" height="46" rx="5" fill="#c9d1dc" stroke="#4b5563"/>
+<text x="745" y="63" font-size="11.5" font-weight="600" fill="#111827">Math</text>
+<text x="745" y="80" font-size="9" fill="#374151">Math | float4 ColA = tex2D(SampLine, IN.Tex </text>
+<rect x="974" y="46" width="190" height="46" rx="5" fill="#c9d1dc" stroke="#4b5563"/>
+<text x="981" y="63" font-size="11.5" font-weight="600" fill="#111827">CombineXYZ</text>
+<text x="981" y="80" font-size="9" fill="#374151">CombineXYZ | float4 ColA = tex2D(SampLine, I</text>
+<rect x="1210" y="46" width="190" height="46" rx="5" fill="#f2b98f" stroke="#4b5563"/>
+<text x="1217" y="63" font-size="11.5" font-weight="600" fill="#111827">Line.png</text>
+<text x="1217" y="80" font-size="9" fill="#374151">TexImage | float4 ColA = tex2D(SampLine, IN.</text>
+<rect x="1446" y="106" width="190" height="46" rx="5" fill="#f2b98f" stroke="#4b5563"/>
+<text x="1453" y="123" font-size="11.5" font-weight="600" fill="#111827">ColA.x</text>
+<text x="1453" y="140" font-size="9" fill="#374151">SeparateColor | float4 ColA = tex2D(SampLine</text>
+<rect x="1446" y="46" width="190" height="46" rx="5" fill="#c9d1dc" stroke="#4b5563"/>
+<text x="1453" y="63" font-size="11.5" font-weight="600" fill="#111827">saturate</text>
+<text x="1453" y="80" font-size="9" fill="#374151">Clamp</text>
+<rect x="30" y="286" width="190" height="46" rx="5" fill="#9fd3a8" stroke="#4b5563"/>
+<text x="37" y="303" font-size="11.5" font-weight="600" fill="#111827">Group Input</text>
+<text x="37" y="320" font-size="9" fill="#374151">NodeGroupInput | Col.rgb *= MainColor</text>
+<rect x="30" y="346" width="190" height="46" rx="5" fill="#9fd3a8" stroke="#4b5563"/>
+<text x="37" y="363" font-size="11.5" font-weight="600" fill="#111827">Group Input</text>
+<text x="37" y="380" font-size="9" fill="#374151">NodeGroupInput | Col.rgb *= MainColor</text>
+<rect x="30" y="406" width="190" height="46" rx="5" fill="#9fd3a8" stroke="#4b5563"/>
+<text x="37" y="423" font-size="11.5" font-weight="600" fill="#111827">Group Input</text>
+<text x="37" y="440" font-size="9" fill="#374151">NodeGroupInput | Col.rgb *= MainColor</text>
+<rect x="1682" y="106" width="190" height="46" rx="5" fill="#c9d1dc" stroke="#4b5563"/>
+<text x="1689" y="123" font-size="11.5" font-weight="600" fill="#111827">Col.rgb.x</text>
+<text x="1689" y="140" font-size="9" fill="#374151">Math | Col.rgb *= MainColor</text>
+<rect x="1682" y="166" width="190" height="46" rx="5" fill="#c9d1dc" stroke="#4b5563"/>
+<text x="1689" y="183" font-size="11.5" font-weight="600" fill="#111827">Col.rgb.y</text>
+<text x="1689" y="200" font-size="9" fill="#374151">Math | Col.rgb *= MainColor</text>
+<rect x="1682" y="226" width="190" height="46" rx="5" fill="#c9d1dc" stroke="#4b5563"/>
+<text x="1689" y="243" font-size="11.5" font-weight="600" fill="#111827">Col.rgb.z</text>
+<text x="1689" y="260" font-size="9" fill="#374151">Math | Col.rgb *= MainColor</text>
+<rect x="1682" y="46" width="190" height="46" rx="5" fill="#c9d1dc" stroke="#4b5563"/>
+<text x="1689" y="63" font-size="11.5" font-weight="600" fill="#111827">Col.a</text>
+<text x="1689" y="80" font-size="9" fill="#374151">Math</text>
+<rect x="1918" y="46" width="190" height="46" rx="5" fill="#c9d1dc" stroke="#4b5563"/>
+<text x="1925" y="63" font-size="11.5" font-weight="600" fill="#111827">saturate</text>
+<text x="1925" y="80" font-size="9" fill="#374151">Clamp</text>
+<rect x="30" y="106" width="190" height="46" rx="5" fill="#9fd3a8" stroke="#4b5563"/>
+<text x="37" y="123" font-size="11.5" font-weight="600" fill="#111827">Group Input</text>
+<text x="37" y="140" font-size="9" fill="#374151">NodeGroupInput | Col.a *= inv_pow(Tr, 32)</text>
+<rect x="266" y="106" width="190" height="46" rx="5" fill="#b9a7e6" stroke="#4b5563"/>
+<text x="273" y="123" font-size="11.5" font-weight="600" fill="#111827">MMEffects: inv_pow(x, p)</text>
+<text x="273" y="140" font-size="9" fill="#374151">Group | Col.a *= inv_pow(Tr, 32)</text>
+<rect x="2154" y="46" width="190" height="46" rx="5" fill="#c9d1dc" stroke="#4b5563"/>
+<text x="2161" y="63" font-size="11.5" font-weight="600" fill="#111827">Col.a</text>
+<text x="2161" y="80" font-size="9" fill="#374151">Math | Col.a *= inv_pow(Tr, 32)</text>
+<rect x="2390" y="46" width="190" height="46" rx="5" fill="#c9d1dc" stroke="#4b5563"/>
+<text x="2397" y="63" font-size="11.5" font-weight="600" fill="#111827">Math</text>
+<text x="2397" y="80" font-size="9" fill="#374151">Math</text>
+<rect x="2626" y="46" width="190" height="46" rx="5" fill="#c9d1dc" stroke="#4b5563"/>
+<text x="2633" y="63" font-size="11.5" font-weight="600" fill="#111827">Math</text>
+<text x="2633" y="80" font-size="9" fill="#374151">Math</text>
+<rect x="2862" y="46" width="190" height="46" rx="5" fill="#e8a0a0" stroke="#4b5563"/>
+<text x="2869" y="63" font-size="11.5" font-weight="600" fill="#111827">Group Output</text>
+<text x="2869" y="80" font-size="9" fill="#374151">NodeGroupOutput</text>
+<rect x="1918" y="106" width="190" height="46" rx="5" fill="#f2b98f" stroke="#4b5563"/>
+<text x="1925" y="123" font-size="11.5" font-weight="600" fill="#111827">CombineColor</text>
+<text x="1925" y="140" font-size="9" fill="#374151">CombineColor</text>
+</svg>

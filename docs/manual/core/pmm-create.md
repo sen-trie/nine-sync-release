@@ -1,14 +1,10 @@
 # PMM Create
 
-## What it does
-
 Writes an MMD project (`.pmm`) from your Blender scene: models, an optional camera, props, and optionally the animation Blender already has.
 
 ## Before you start
 
-- mmd_tools is installed; the panel says *Needs mmd_tools* otherwise.
 - Your models are mmd_tools models loaded from PMX files.
-- NineSync's bundled project template must be present; the panel warns if it is missing.
 
 <!-- SCREENSHOT: Create MMD Project panel -->
 
