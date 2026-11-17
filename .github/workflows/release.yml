@@ -51,8 +51,10 @@ jobs:
           tag="v$(python -c "import tomllib; print(tomllib.load(open('packaging/bundle/blender_manifest.toml','rb'))['version'])")"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "Release tag: $tag" >> "$GITHUB_STEP_SUMMARY"
-          if [ "$DRAFT" = "true" ] && { gh release view "$tag" >/dev/null 2>&1 || git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; }; then
-            echo "tag or release $tag already exists; raise the Bundled version first" >&2; exit 1
+          # A published release or an existing tag is never replaced; an unpublished draft is (see the draft job).
+          # (This token may not see drafts, which is fine: the draft job re-checks with write access.)
+          if [ "$DRAFT" = "true" ] && { [ "$(gh release view "$tag" --json isDraft --jq '.isDraft' 2>/dev/null)" = "false" ] || git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; }; then
+            echo "tag or published release $tag already exists; raise the Bundled version first" >&2; exit 1
           fi
       - name: Show pinned sources
         run: git submodule status
@@ -145,13 +147,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.build.outputs.tag }}
         run: python -I packaging/release_notes.py draft --artifact-manifest dist/artifact-manifest.json --version "$TAG" --out dist/release-notes.md
-      - name: Create the draft release (never overwrites)
+      - name: Create the draft release (replaces an unpublished draft, never a published release)
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.build.outputs.tag }}
         run: |
-          if gh release view "$TAG" >/dev/null 2>&1 || git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
-            echo "tag or release $TAG already exists; refusing to touch it" >&2; exit 1
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "tag $TAG already exists; refusing to touch it" >&2; exit 1
+          fi
+          if state=$(gh release view "$TAG" --json isDraft --jq '.isDraft' 2>/dev/null); then
+            [ "$state" = "true" ] || { echo "release $TAG is published; refusing to touch it" >&2; exit 1; }
+            echo "replacing the existing unpublished draft $TAG"
+            gh release delete "$TAG" --yes
           fi
           { cat dist/release-notes.md; printf '\n---\n\nBuilt from %s with the submodule pins and dependency lock in this commit. See artifact-manifest.json for commits, dependency versions and checksums.\n' "$GITHUB_SHA"; } > dist/release-body.md
           gh release create "$TAG" --draft --target "$GITHUB_SHA" --title "NineSync $TAG" \

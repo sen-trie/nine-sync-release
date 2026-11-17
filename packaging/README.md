@@ -21,7 +21,7 @@ Manual dispatch. Builds, validates statically, validates inside an official Blen
 release tagged `v<bundle version>` (the `create_draft_release` box, on by default) and adds the exact validated ZIP to
 the extension repository. Every run needs a passing Blender validation of that ZIP, and a person approves the `release`
 and `extension-repository` environments. The tag comes from `packaging/bundle/blender_manifest.toml`; the run fails early
-if it already exists. Unchanged by the experimental path.
+if a published release or the tag already exists; an unpublished draft with the same tag is replaced. Unchanged by the experimental path.
 
 ### Extension repository on GitHub Pages
 
