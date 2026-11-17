@@ -17,13 +17,15 @@ Scripts that build and check the combined NineSync Blender extension. Standard l
 
 ## Stable release (`.github/workflows/release.yml`)
 
-Manual dispatch. Builds, validates statically, validates inside an official Blender 5.3 or newer, and on request
-creates a **draft** release. Requires a passing Blender validation of the exact
-ZIP and approval of the `release` environment. Unchanged by the experimental path.
+Manual dispatch. Builds, validates statically, validates inside an official Blender 5.3 or newer, creates a **draft**
+release tagged `v<bundle version>` (the `create_draft_release` box, on by default) and adds the exact validated ZIP to
+the extension repository. Every run needs a passing Blender validation of that ZIP, and a person approves the `release`
+and `extension-repository` environments. The tag comes from `packaging/bundle/blender_manifest.toml`; the run fails early
+if it already exists. Unchanged by the experimental path.
 
 ### Extension repository on GitHub Pages
 
-Input `deploy_extension_repository` (independent of `create_draft_release`; both may be set in one run). Jobs:
+Runs on every release run, after validation. Jobs:
 
 1. `assemble-repository` (environment `extension-repository`, the manual approval): re-runs `check_publish_gates.py`, fetches an
    official Blender, then `extension_repo.py assemble` downloads every version already served at the Pages URL (each checked

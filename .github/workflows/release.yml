@@ -1,32 +1,21 @@
 name: Bundled release
 
 # Manual only. Builds the combined NineSync extension from the commits pinned by this repository's submodules,
-# validates it, and (only when asked, and only after validation passes) creates a DRAFT GitHub release.
-# Nothing is published automatically: a draft still needs a person to publish it, and the GitHub Pages extension
-# repository is only updated on request, after validation, and after approval of the `extension-repository` environment.
+# validates it in official Blender, then (only after validation passes) creates a DRAFT GitHub release tagged
+# v<bundle version> and adds the exact validated ZIP to the GitHub Pages extension repository.
+# Nothing goes live without a person: the draft needs publishing by hand, and the `release` and
+# `extension-repository` environments need approval.
 on:
   workflow_dispatch:
     inputs:
-      run_validation:
-        description: "Validate inside Blender (official build, 5.3 or newer). Required before publication."
-        type: boolean
-        default: true
       blender_version:
         description: "Official Blender release to validate with (must be 5.3.0 or newer and exist on download.blender.org)"
         type: string
         default: "5.3.0"
       create_draft_release:
-        description: "Create a DRAFT release with the artifacts (needs a passing Blender validation of the exact ZIP)"
+        description: "Create a DRAFT release v<bundle version> with the artifacts"
         type: boolean
-        default: false
-      release_tag:
-        description: "Tag for the draft release, e.g. v0.1.0 (required when create_draft_release is true; must not exist)"
-        type: string
-        default: ""
-      deploy_extension_repository:
-        description: "Add this exact validated build to the GitHub Pages extension repository (needs validation, an official Blender, all gates, and approval of the extension-repository environment)"
-        type: boolean
-        default: false
+        default: true
 
 permissions:
   contents: read
@@ -43,6 +32,8 @@ jobs:
     name: Build and statically validate
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -51,15 +42,18 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
-      - name: Check the publication inputs early
-        if: ${{ inputs.create_draft_release || inputs.deploy_extension_repository }}
+      - name: Release tag is v<bundle version> and is new
+        id: tag
         env:
-          TAG: ${{ inputs.release_tag }}
+          GH_TOKEN: ${{ github.token }}
           DRAFT: ${{ inputs.create_draft_release }}
-          VALIDATE: ${{ inputs.run_validation }}
         run: |
-          [ "$DRAFT" != "true" ] || [ -n "$TAG" ] || { echo "release_tag is required for a draft release" >&2; exit 1; }
-          [ "$VALIDATE" = "true" ] || { echo "publication needs run_validation" >&2; exit 1; }
+          tag="v$(python -c "import tomllib; print(tomllib.load(open('packaging/bundle/blender_manifest.toml','rb'))['version'])")"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Release tag: $tag" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$DRAFT" = "true" ] && { gh release view "$tag" >/dev/null 2>&1 || git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; }; then
+            echo "tag or release $tag already exists; raise the Bundled version first" >&2; exit 1
+          fi
       - name: Show pinned sources
         run: git submodule status
       - name: Build
@@ -78,7 +72,6 @@ jobs:
   validate:
     name: Validate in Blender
     needs: build
-    if: ${{ inputs.run_validation }}
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
@@ -150,12 +143,12 @@ jobs:
       - name: Draft release notes (Core, FX and Bundled changes since the previous published release)
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ inputs.release_tag }}
+          TAG: ${{ needs.build.outputs.tag }}
         run: python -I packaging/release_notes.py draft --artifact-manifest dist/artifact-manifest.json --version "$TAG" --out dist/release-notes.md
       - name: Create the draft release (never overwrites)
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ inputs.release_tag }}
+          TAG: ${{ needs.build.outputs.tag }}
         run: |
           if gh release view "$TAG" >/dev/null 2>&1 || git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
             echo "tag or release $TAG already exists; refusing to touch it" >&2; exit 1
@@ -168,12 +161,12 @@ jobs:
 
   # --- Self-hosted Blender extension repository (GitHub Pages) -------------------------------------------------
   # Adds the exact ZIP that passed every gate above to the repository served at the Pages URL, so Blender can
-  # install and update NineSync natively. Manual input, same gates as the draft release, plus a person must approve
+  # install and update NineSync natively. Same gates as the draft release, plus a person must approve
   # the `extension-repository` environment. Experimental builds never reach this workflow.
   assemble-repository:
     name: Assemble extension repository
     needs: [build, validate]
-    if: ${{ inputs.deploy_extension_repository && needs.validate.result == 'success' }}
+    if: ${{ needs.validate.result == 'success' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     environment: extension-repository # configure required reviewers on this environment for a manual approval step
