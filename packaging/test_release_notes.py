@@ -37,7 +37,7 @@ class NotesTests(unittest.TestCase):
         self.assertNotIn("Not shipped yet", body)         # unreleased never appears
         self.assertNotIn("- Old.", body)                  # already in the previous Bundled release
         self.assertIn("Installer fix for the combined extension.", body)
-        self.assertIn("Changes since [v0.3.0]", body)
+        self.assertNotIn("Changes since", body)
         self.assertIn("releases/tag/v0.3.1", body)        # links to the GitHub Releases
 
     def test_missing_changelog_entry_is_reported_not_invented(self):

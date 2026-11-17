@@ -1,11 +1,23 @@
 name: Bundled release
 
-# Manual only. Builds the combined NineSync extension from the commits pinned by this repository's submodules,
-# validates it in official Blender, then (only after validation passes) creates a DRAFT GitHub release tagged
-# v<bundle version> and adds the exact validated ZIP to the GitHub Pages extension repository.
+# Builds the combined NineSync extension from the commits pinned by this repository's submodules, validates it in
+# official Blender, then (only after validation passes) creates a DRAFT GitHub release tagged v<bundle version>.
+#
+# Triggers:
+#  - push to main that changes a submodule pin or the Bundled manifest (for example merging the component-update
+#    PR, which also raises the Bundled version).
+#  - manual dispatch.
+# Both do the same: build, validate, create the DRAFT release, and (after the `extension-repository` approval) add
+# the exact validated ZIP to the GitHub Pages extension repository.
 # Nothing goes live without a person: the draft needs publishing by hand, and the `release` and
-# `extension-repository` environments need approval.
+# `extension-repository` environments need approval. A push whose version was not raised fails at the tag check.
 on:
+  push:
+    branches: [main]
+    paths:
+      - nine-sync-core
+      - nine-sync-fx
+      - packaging/bundle/blender_manifest.toml
   workflow_dispatch:
     inputs:
       blender_version:
@@ -46,7 +58,7 @@ jobs:
         id: tag
         env:
           GH_TOKEN: ${{ github.token }}
-          DRAFT: ${{ inputs.create_draft_release }}
+          DRAFT: ${{ github.event_name == 'push' || inputs.create_draft_release }}
         run: |
           tag="v$(python -c "import tomllib; print(tomllib.load(open('packaging/bundle/blender_manifest.toml','rb'))['version'])")"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
@@ -94,7 +106,7 @@ jobs:
       - name: Fetch Blender
         id: blender
         env:
-          BLENDER_VERSION: ${{ inputs.blender_version }}
+          BLENDER_VERSION: ${{ inputs.blender_version || '5.3.0' }}
         run: |
           exe=$(python -I packaging/fetch_blender.py --version "$BLENDER_VERSION" --dest build/blender)
           echo "exe=$exe" >> "$GITHUB_OUTPUT"
@@ -119,7 +131,7 @@ jobs:
   draft-release:
     name: Create draft release
     needs: [build, validate]
-    if: ${{ inputs.create_draft_release && needs.validate.result == 'success' }}
+    if: ${{ (github.event_name == 'push' || inputs.create_draft_release) && needs.validate.result == 'success' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment: release # configure required reviewers on this environment for a manual approval step
@@ -160,11 +172,10 @@ jobs:
             echo "replacing the existing unpublished draft $TAG"
             gh release delete "$TAG" --yes
           fi
-          { cat dist/release-notes.md; printf '\n---\n\nBuilt from %s with the submodule pins and dependency lock in this commit. See artifact-manifest.json for commits, dependency versions and checksums.\n' "$GITHUB_SHA"; } > dist/release-body.md
           gh release create "$TAG" --draft --target "$GITHUB_SHA" --title "NineSync $TAG" \
-            --notes-file dist/release-body.md \
-            dist/release-notes.md dist/nine-sync-*-blender-extensions.zip dist/nine-sync-*-blender-extensions.zip.sha256 \
-            dist/artifact-manifest.json dist/static-validation.json dist/blender-validation.json
+            --notes-file dist/release-notes.md \
+            dist/nine-sync-*-blender-extensions.zip \
+            dist/artifact-manifest.json dist/blender-validation.json
 
   # --- Self-hosted Blender extension repository (GitHub Pages) -------------------------------------------------
   # Adds the exact ZIP that passed every gate above to the repository served at the Pages URL, so Blender can
@@ -214,7 +225,7 @@ jobs:
       - name: Fetch official Blender
         id: blender
         env:
-          BLENDER_VERSION: ${{ inputs.blender_version }}
+          BLENDER_VERSION: ${{ inputs.blender_version || '5.3.0' }}
         run: |
           exe=$(python -I packaging/fetch_blender.py --version "$BLENDER_VERSION" --dest build/blender)
           [ "$(cat build/blender/official.txt)" = "true" ] || { echo "official Blender required" >&2; exit 1; }

@@ -118,6 +118,37 @@ def fmt(version):
     return ".".join(str(p) for p in version)
 
 
+def bump_level(before, after):
+    """0 major, 1 minor, 2 patch: the first part that differs; None when the versions are equal."""
+    return next((i for i, (a, b) in enumerate(zip(before, after)) if a != b), None)
+
+
+def next_bundle_version(current, base_pins, targets):
+    """Bundled version after pinning: raised at the highest level any component moved (see VERSIONING.md).
+
+    A major bump resets minor and patch; a minor bump resets patch. Computed from the base branch's version, so
+    re-running the update never stacks bumps.
+    """
+    levels = [
+        bump_level(base_pins[k]["version"], t["version"])
+        for k, t in targets.items()
+        if t["version"] != base_pins[k]["version"]
+    ]
+    if not levels:
+        return current
+    level = min(levels)
+    bumped = list(current[: level]) + [current[level] + 1]
+    return tuple(bumped + [0] * (3 - len(bumped)))
+
+
+def rewrite_version(text, pattern, new, label):
+    """Replace the one version assignment matched by `pattern` (groups: prefix, old, suffix)."""
+    out, count = re.subn(pattern, lambda m: m.group(1) + new + m.group(3), text, count=1, flags=re.M)
+    if count != 1:
+        raise Failure("%s has no version line to update" % label)
+    return out
+
+
 def load_config():
     with open(os.path.join(HERE, "components.json"), encoding="utf-8") as handle:
         cfg = json.load(handle)
@@ -333,10 +364,11 @@ def describe(cfg, base_pins, targets):
     return lines
 
 
-def commit_message(cfg, base_pins, targets):
-    return "\n".join(
-        [cfg["title"], ""] + describe(cfg, base_pins, targets) + ["", cfg["marker"]]
-    )
+def commit_message(cfg, base_pins, targets, bundle=None):
+    lines = describe(cfg, base_pins, targets)
+    if bundle and bundle[0] != bundle[1]:
+        lines.append("Bundled: %s -> %s" % (fmt(bundle[0]), fmt(bundle[1])))
+    return "\n".join([cfg["title"], ""] + lines + ["", cfg["marker"]])
 
 
 def branch_state(api, cfg, bundled, base, app_slug):
@@ -350,6 +382,7 @@ def branch_state(api, cfg, bundled, base, app_slug):
         raise
     cmp = api.get("/repos/%s/compare/%s...%s" % (bundled, base, branch))
     allowed = {c["path"] for c in cfg["components"].values()}
+    allowed |= {cfg["bundle_manifest"], cfg["bundle_init"]}
     bot = (app_slug + "[bot]") if app_slug else None
     problems = []
     for commit in cmp.get("commits", []):
@@ -418,7 +451,9 @@ def update(api, cfg, bundled, event=None, app_slug=None, dry_run=False, log=prin
     if not changed:
         log("selected versions are already current; nothing to do")
         return "current"
-    problems = check_compat(api, cfg, targets, bundle_version(api, cfg, bundled, base))
+    current_bundle = bundle_version(api, cfg, bundled, base)
+    new_bundle = next_bundle_version(current_bundle, base_pins, targets)
+    problems = check_compat(api, cfg, targets, new_bundle)
     if problems:
         raise Failure(
             "incompatible Core/FX combination; the last compatible state is kept: "
@@ -453,13 +488,35 @@ def update(api, cfg, bundled, event=None, app_slug=None, dry_run=False, log=prin
             }
             for k, t in changed.items()
         ]
+        for path, pattern, label in (
+            (cfg["bundle_manifest"], r'^(version\s*=\s*")(\d+\.\d+\.\d+)(")', "the Bundled manifest"),
+            (cfg["bundle_init"], r"^(BUNDLE_VERSION\s*=\s*)(\(\d+,\s*\d+,\s*\d+\))()", "the Bundled __init__.py"),
+        ):
+            text = api.get_raw(
+                "/repos/%s/contents/%s?ref=%s" % (bundled, path, base)
+            ).decode("utf-8")
+            new = (
+                fmt(new_bundle)
+                if path == cfg["bundle_manifest"]
+                else "(%s)" % ", ".join(str(p) for p in new_bundle)
+            )
+            entries.append(
+                {
+                    "path": path,
+                    "mode": "100644",
+                    "type": "blob",
+                    "content": rewrite_version(text, pattern, new, label),
+                }
+            )
         new_tree = api.post(
             "/repos/%s/git/trees" % bundled, {"base_tree": tree, "tree": entries}
         )["sha"]
         new_commit = api.post(
             "/repos/%s/git/commits" % bundled,
             {
-                "message": commit_message(cfg, base_pins, targets),
+                "message": commit_message(
+                    cfg, base_pins, targets, (current_bundle, new_bundle)
+                ),
                 "tree": new_tree,
                 "parents": [base_commit],
             },

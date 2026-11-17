@@ -4,6 +4,7 @@
   "title": "chore: Update NineSync Core and FX",
   "marker": "NineSync-Automation: update-components",
   "bundle_manifest": "packaging/bundle/blender_manifest.toml",
+  "bundle_init": "packaging/bundle/__init__.py",
   "components": {
     "core": {"repository": "sen-trie/nine-sync-core", "path": "nine-sync-core", "label": "Core"},
     "fx": {"repository": "sen-trie/nine-sync-fx", "path": "nine-sync-fx", "label": "FX"}

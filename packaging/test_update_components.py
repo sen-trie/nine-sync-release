@@ -29,6 +29,7 @@ class Fake:
         self.repos = {r: {"releases": [], "tags": {}, "default": set(), "manifest": {}, "hooks": {}} for r in (CORE, FX)}
         self.trees, self.commits, self.refs, self.prs, self.writes = {}, {}, {}, [], []
         self.bundle_manifest = b'version = "0.3.0"\n'
+        self.bundle_init = b"BUNDLE_VERSION = (0, 3, 0)\n"
         self.bundled_changelog = b"# Changelog\n\n## [Unreleased]\n\n- Installer fix for the combined extension.\n"
         self.bundled_releases = [{"tag_name": "v0.3.0", "draft": False, "published_at": "2026-11-01T00:00:00Z",
                                   "assets": [{"name": "artifact-manifest.json", "browser_download_url": "https://github.com/x/y/m.json"}]}]
@@ -70,7 +71,10 @@ class Fake:
                 return self.bundled_changelog
             if file.startswith("packaging/dependencies.lock"):
                 return b'{"components": {}}'
-            return self.bundle_manifest
+            path = file.split("?")[0]
+            if ref in self.refs and isinstance(self.pins_at(ref).get(path), bytes):
+                return self.pins_at(ref)[path]  # a file the automation wrote on the branch
+            return self.bundle_init if path.endswith("__init__.py") else self.bundle_manifest
         if file.startswith("CHANGELOG.md"):
             if (repo, ref) not in self.changelogs:
                 raise uc.ApiError(404, path)
@@ -162,6 +166,10 @@ class Fake:
             tree = "tree-new%d" % len(self.trees)
             pins = dict(self.trees[body["base_tree"]])
             for e in body["tree"]:
+                if e["type"] == "blob":
+                    assert e["mode"] == "100644"
+                    pins[e["path"]] = e["content"].encode()
+                    continue
                 assert e["mode"] == "160000" and e["type"] == "commit"
                 pins[e["path"]] = e["sha"]
             self.trees[tree] = pins
@@ -218,7 +226,7 @@ class UpdateTests(unittest.TestCase):
         pr = self.api.prs[0]
         self.assertEqual(pr["title"], "chore: Update NineSync Core and FX")
         self.assertNotIn("maintained by", pr["body"])
-        self.assertIn("| Core | ", pr["body"])
+        self.assertNotIn("| Component |", pr["body"])
         self.assertEqual(self.api.pins_at("main")["nine-sync-core"], sha("core0.3.0"), "main must not move")
 
     def test_2_fx_release_updates_the_same_pr(self):
@@ -228,7 +236,7 @@ class UpdateTests(unittest.TestCase):
         self.assertEqual(self.run_update(event(FX, "0.3.1", f, "fx")), "updated")
         self.assertEqual(len(self.api.prs), 1)
         self.assertEqual((self.pins()["nine-sync-core"], self.pins()["nine-sync-fx"]), (c, f))
-        self.assertIn("| FX | ", self.api.prs[0]["body"])
+        self.assertIn("### FX", self.api.prs[0]["body"])
 
     def test_3_newer_core_updates_the_existing_pr(self):
         self.run_update(event(CORE, "0.3.1", self.release(CORE, "0.3.1"), "core"))
@@ -329,6 +337,38 @@ class UpdateTests(unittest.TestCase):
         self.assertEqual(self.run_update(), "updated")
         self.assertEqual(len(self.api.prs), 1)
 
+    def bundle_at_branch(self):
+        pins = self.pins()
+        manifest = pins["packaging/bundle/blender_manifest.toml"].decode()
+        init = pins["packaging/bundle/__init__.py"].decode()
+        return manifest.split('"')[1], init.split("(")[1].split(")")[0]
+
+    def test_bundled_version_follows_the_highest_level(self):
+        for core, fx, expected in (
+            ("0.3.1", None, ("0.3.1", "0, 3, 1")),
+            ("0.3.1", "0.4.0", ("0.4.0", "0, 4, 0")),
+            ("1.0.0", "0.3.1", ("1.0.0", "1, 0, 0")),
+            (None, "0.3.2", ("0.3.1", "0, 3, 1")),
+        ):
+            self.setUp()
+            if core:
+                self.release(CORE, core)
+            if fx:
+                self.release(FX, fx)
+            self.run_update()
+            self.assertEqual(self.bundle_at_branch(), expected, (core, fx))
+
+    def test_bundled_bump_is_not_stacked_by_later_runs(self):
+        self.release(CORE, "0.3.1")
+        self.run_update()
+        self.release(CORE, "0.3.2")
+        self.run_update()
+        self.assertEqual(self.bundle_at_branch(), ("0.3.1", "0, 3, 1"))  # still base + one patch
+        self.release(FX, "0.4.0")
+        self.run_update()
+        self.assertEqual(self.bundle_at_branch(), ("0.4.0", "0, 4, 0"))
+        self.assertIn("Bundled: 0.3.0 -> 0.4.0", self.api.commits[self.api.refs["automation/update-components"]]["message"])
+
     def test_dry_run_writes_nothing(self):
         self.release(CORE, "0.3.1")
         self.assertEqual(self.run_update(dry_run=True), "dry-run")
@@ -342,11 +382,26 @@ class PolicyTests(unittest.TestCase):
         with open(os.path.join(ROOT, ".github", "workflows", name), encoding="utf-8") as handle:
             return handle.read()
 
-    def test_release_workflows_are_manual_only(self):
-        for name in ("release.yml", "experimental-release.yml"):
-            text = self.workflow(name)
-            on_block = text.split("\non:\n", 1)[1].split("\npermissions:", 1)[0]
-            self.assertEqual(re.findall(r"^  (\w+):", on_block, re.M), ["workflow_dispatch"], name)
+    def on_block(self, name):
+        return self.workflow(name).split("\non:\n", 1)[1].split("\npermissions:", 1)[0]
+
+    def test_experimental_release_is_manual_only(self):
+        self.assertEqual(re.findall(r"^  (\w+):", self.on_block("experimental-release.yml"), re.M), ["workflow_dispatch"])
+
+    def test_bundled_release_starts_only_on_pin_changes_or_by_hand(self):
+        block = self.on_block("release.yml")
+        self.assertEqual(re.findall(r"^  (\w+):", block, re.M), ["push", "workflow_dispatch"])
+        self.assertIn("branches: [main]", block)
+        push = block.split("workflow_dispatch:", 1)[0]
+        self.assertEqual(re.findall(r"^      - (\S+)$", push, re.M),
+                         ["nine-sync-core", "nine-sync-fx", "packaging/bundle/blender_manifest.toml"])
+
+    def test_extension_repository_waits_for_approval_and_nothing_is_published(self):
+        text = self.workflow("release.yml")
+        self.assertRegex(text, r"assemble-repository:(?:.*\n)*?    environment: extension-repository")
+        self.assertNotIn("gh release edit", text)
+        self.assertNotIn("--draft=false", text)
+        self.assertNotIn("--latest", text)
 
     def test_automation_workflows_cannot_publish_or_merge(self):
         for name in ("update-components.yml", "pr-validation.yml"):

@@ -17,7 +17,9 @@ Scripts that build and check the combined NineSync Blender extension. Standard l
 
 ## Stable release (`.github/workflows/release.yml`)
 
-Manual dispatch. Builds, validates statically, validates inside an official Blender 5.3 or newer, creates a **draft**
+Starts automatically on a push to `main` that changes a submodule pin or the Bundled manifest (merging the
+component-update PR does), and by manual dispatch. Both paths build, validate, create the **draft** and, after the
+`extension-repository` approval, add the ZIP to the extension repository. Builds, validates statically, validates inside an official Blender 5.3 or newer, creates a **draft**
 release tagged `v<bundle version>` (the `create_draft_release` box, on by default) and adds the exact validated ZIP to
 the extension repository. Every run needs a passing Blender validation of that ZIP, and a person approves the `release`
 and `extension-repository` environments. The tag comes from `packaging/bundle/blender_manifest.toml`; the run fails early

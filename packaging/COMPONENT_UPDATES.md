@@ -22,13 +22,17 @@ releases. It is never merged automatically, and merging it never publishes anyth
 3. A component only moves when its latest release is newer than what `main` pins.
 4. Core/FX must be compatible, using the rules `validate_bundle.py` already enforces: byte-identical `hooks.py` and
    `API_VERSION = 1`. If not, the run fails, nothing is written and the last compatible state stays.
-   Versions are not compared; the Bundled version follows its own rule (see `VERSIONING.md`).
-5. The branch is derived entirely from `main` plus the new pins and written as a single commit through the Git
+   Core and FX versions are not compared with each other.
+5. The same commit raises the Bundled version (`blender_manifest.toml` and `BUNDLE_VERSION` in
+   `bundle/__init__.py`) at the highest level any component moved: a Core/FX major gives a Bundled major, a minor a
+   minor, a patch a patch (lower parts reset to 0; see `VERSIONING.md`). It is computed from `main`'s version, so
+   repeated runs never stack bumps.
+6. The branch is derived entirely from `main` plus the new pins and written as a single commit through the Git
    data API, so a late `main` change is picked up and nothing accumulates. Every push to the PR counts as new
    commits, which dismisses stale approvals when that repository setting is on.
-6. If anyone pushed their own commit or touched another path on the branch, the run fails with a conflict report
+7. If anyone pushed their own commit or touched another path on the branch, the run fails with a conflict report
    and does not overwrite it.
-7. Runs are serialized (`concurrency: update-components`, no cancel of a running job).
+8. Runs are serialized (`concurrency: update-components`, no cancel of a running job).
 
 ## Required GitHub setup (not done by these files)
 

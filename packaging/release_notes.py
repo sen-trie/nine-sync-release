@@ -155,14 +155,6 @@ def draft_notes(api, cfg, bundled, current, current_deps, unreleased, label, exc
         lines += ["No earlier Bundled release was found, so there is no baseline to compare against.", ""]
     elif manifest is None:
         lines += ["The previous release (%s) has no readable artifact-manifest.json, so component changes are not enumerated." % release["tag_name"], ""]
-    else:
-        lines += ["Changes since [%s](%s)." % (release["tag_name"], release.get("html_url") or
-                  "https://github.com/%s/releases/tag/%s" % (bundled, release["tag_name"])), ""]
-    lines += ["### Components", "", "| Component | Previous | This release |", "| --- | --- | --- |"]
-    for key, comp in cfg["components"].items():
-        lines.append("| %s | %s | %s |" % (comp["label"], uc.fmt(old[key]) if old[key] else "-", uc.fmt(current[key]["version"])))
-    lines.append("")
-    lines += ["## What's changed", ""]
     for key in cfg["components"]:
         lines += component_section(api, cfg, key, old[key], current[key]["version"], current[key]["commit"])
     lines += ["## Packaging", ""]

@@ -3,7 +3,8 @@
 The Bundled extension (`nine-sync-<version>-blender-extensions.zip`) has its own version, independent of Core and FX.
 Core and FX are also versioned independently of each other. No build or update check compares the three numbers.
 
-The Bundled version is raised by hand (`packaging/bundle/blender_manifest.toml` and `BUNDLE_VERSION` in
+The Bundled version is raised automatically by the component-update PR (at the highest level any component moved),
+or by hand for Bundled-only changes (`packaging/bundle/blender_manifest.toml` and `BUNDLE_VERSION` in
 `packaging/bundle/__init__.py`, which must match) following Core and FX:
 
 - **Major**: raised only when Core or FX raises its major.

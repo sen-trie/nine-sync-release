@@ -107,5 +107,5 @@ jobs:
           python -I packaging/experimental_notes.py > notes.md
           gh release create "$TAG" --prerelease --target "$GITHUB_SHA" --title "NineSync $TAG (experimental, unvalidated)" \
             --notes-file notes.md \
-            dist/nine-sync-*-blender-extensions.zip dist/nine-sync-*-blender-extensions.zip.sha256 \
+            dist/nine-sync-*-blender-extensions.zip \
             dist/artifact-manifest.json dist/static-validation.json
