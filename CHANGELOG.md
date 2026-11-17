@@ -3,11 +3,12 @@
 ## [0.2.0]
 
 - Expanded the documentation wiki.
+- Component updates now resolve published releases only.
 
 ### Included
 
-- NineSync: PMM Bridge (Core) [0.8.0]
-- NineSync: FX Importer (FX) [0.4.0]
+- NineSync: PMM Bridge (Core) [0.8.2]
+- NineSync: FX Importer (FX) [0.6.0]
 
 ## [0.1.0]
 
