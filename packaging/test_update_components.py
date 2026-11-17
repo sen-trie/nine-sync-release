@@ -217,8 +217,8 @@ class UpdateTests(unittest.TestCase):
         self.assertEqual(len(self.api.prs), 1)
         pr = self.api.prs[0]
         self.assertEqual(pr["title"], "chore: Update NineSync Core and FX")
-        self.assertIn("Core: 0.3.0 -> 0.3.1", pr["body"])
-        self.assertIn("FX:   0.3.0 (unchanged)", pr["body"])
+        self.assertNotIn("maintained by", pr["body"])
+        self.assertIn("| Core | ", pr["body"])
         self.assertEqual(self.api.pins_at("main")["nine-sync-core"], sha("core0.3.0"), "main must not move")
 
     def test_2_fx_release_updates_the_same_pr(self):
@@ -228,8 +228,7 @@ class UpdateTests(unittest.TestCase):
         self.assertEqual(self.run_update(event(FX, "0.3.1", f, "fx")), "updated")
         self.assertEqual(len(self.api.prs), 1)
         self.assertEqual((self.pins()["nine-sync-core"], self.pins()["nine-sync-fx"]), (c, f))
-        self.assertIn("Core: 0.3.0 -> 0.3.1", self.api.prs[0]["body"])
-        self.assertIn("FX:   0.3.0 -> 0.3.1", self.api.prs[0]["body"])
+        self.assertIn("| FX | ", self.api.prs[0]["body"])
 
     def test_3_newer_core_updates_the_existing_pr(self):
         self.run_update(event(CORE, "0.3.1", self.release(CORE, "0.3.1"), "core"))
@@ -237,7 +236,7 @@ class UpdateTests(unittest.TestCase):
         self.assertEqual(self.run_update(event(CORE, "0.3.2", c2, "core")), "updated")
         self.assertEqual(len(self.api.prs), 1)
         self.assertEqual(self.pins()["nine-sync-core"], c2)
-        self.assertIn("Core: 0.3.0 -> 0.3.2", self.api.prs[0]["body"])
+        self.assertIn("0.3.2", self.api.prs[0]["body"])
 
     def test_4_duplicate_notification_changes_nothing(self):
         c = self.release(CORE, "0.3.1")

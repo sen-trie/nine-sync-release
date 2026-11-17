@@ -35,7 +35,6 @@ if HERE not in sys.path:
 STABLE_TAG = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)$")
 REPO_NAME = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 SHA = re.compile(r"^[0-9a-f]{40}$")
-SEP = "\n\n---\n\n"
 
 
 class Failure(Exception):
@@ -334,28 +333,6 @@ def describe(cfg, base_pins, targets):
     return lines
 
 
-def pr_body(cfg, base_pins, targets):
-    lines = (
-        ["Update NineSync components", ""]
-        + ["    " + l for l in describe(cfg, base_pins, targets)]
-        + [""]
-    )
-    for key, comp in cfg["components"].items():
-        t = targets[key]
-        if t["tag"]:
-            lines.append(
-                "- %s `%s` at `%s`: https://github.com/%s/releases/tag/%s"
-                % (
-                    comp["label"],
-                    t["tag"],
-                    t["commit"][:12],
-                    comp["repository"],
-                    t["tag"],
-                )
-            )
-    return "\n".join(lines)
-
-
 def commit_message(cfg, base_pins, targets):
     return "\n".join(
         [cfg["title"], ""] + describe(cfg, base_pins, targets) + ["", cfg["marker"]]
@@ -509,13 +486,13 @@ def update(api, cfg, bundled, event=None, app_slug=None, dry_run=False, log=prin
             )
             status = "created"
         log("branch %s: %s at %s" % (cfg["branch"], status, new_commit[:12]))
-    body = pr_body(cfg, base_pins, targets)
+    body = ""
     try:
         import release_notes  # lazy: release_notes imports this module
 
-        body += SEP + release_notes.pr_section(api, cfg, bundled, base, targets)
+        body = release_notes.pr_section(api, cfg, bundled, base, targets)
     except (Failure, ApiError) as exc:
-        body += SEP + "Draft release notes could not be generated: %s" % exc
+        body = "Draft release notes could not be generated: %s" % exc
     if pr is None:
         pr = api.post(
             "/repos/%s/pulls" % bundled,
