@@ -2,7 +2,7 @@
 """Draft release notes for NineSync Bundled, built only from published facts.
 
     python -I packaging/release_notes.py draft --artifact-manifest dist/artifact-manifest.json --version v0.3.1 --out notes.md
-    python -I packaging/release_notes.py finalize --version 0.3.1 --date 2026-12-01      # edits CHANGELOG.md
+    python -I packaging/release_notes.py finalize --version 0.3.1 --date 2026-12-01      # edits CHANGELOG.md and docs/changelog.md
 
 What goes in, and where it comes from:
   * Core / FX: the entries of every *published* component version after the one in the previous published Bundled
@@ -23,6 +23,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 import tomllib
 import urllib.error
@@ -224,6 +225,10 @@ def main(argv=None):
                 raise uc.Failure("--date must be YYYY-MM-DD")
             finalize(CHANGELOG, args.version, args.date)
             print("CHANGELOG.md finalized for", args.version)
+            # The wiki changelog is generated from CHANGELOG.md, so regenerate it in the same step; both files then go in one commit.
+            built = subprocess.run([sys.executable, "-I", os.path.join(ROOT, "packaging", "build_changelog.py")], check=False)
+            if built.returncode != 0:
+                raise uc.Failure("CHANGELOG.md was finalized but docs/changelog.md could not be regenerated")
             return 0
         cfg = uc.load_config()
         api = uc.GitHub(os.environ.get("GH_TOKEN", ""))

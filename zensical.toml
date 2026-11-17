@@ -69,6 +69,8 @@ features = [
   "content.code.copy",
 ]
 font.text = "Nunito"
+logo = "assets/logo-single.png"
+favicon = "assets/favicon.png"
 
 [[project.theme.palette]]
 scheme = "slate"

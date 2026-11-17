@@ -12,6 +12,10 @@ No credit is needed for artwork or animations made with NineSync. If you want to
 <br/>
 Absolutely. Please share reproducible steps and example files when their licenses permit it. See [Contributors Wanted](contributors.md).
 
+**Does NineSync send my project data anywhere?**
+<br/>
+No. Core and FX process project data locally, and the addon doesn't send any files or telemetry to the developer. The FX shared library, `mme_core.blend`, is a local library shared between your projects and is not uploaded online.
+
 **Was AI used to develop NineSync?**
 <br/>
 Yes. AI was used extensively during development. See the [Disclaimer](disclaimer.md).
