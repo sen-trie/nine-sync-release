@@ -1,0 +1,15 @@
+{
+  "_comment": "Which domain owns each documentation page (longest matching path wins; a path ending in / is a prefix). Owners author and review their pages and translations; the release repo assembles and publishes the site. Checked by docs_i18n.py inventory --check.",
+  "owners": [
+    {"path": "", "owner": "release"},
+    {"path": "manual/core/", "owner": "core"},
+    {"path": "manual/fx/", "owner": "fx"},
+    {"path": "examples/rigify-vmd.md", "owner": "core"},
+    {"path": "examples/export-to-mmd.md", "owner": "core"},
+    {"path": "examples/collaboration.md", "owner": "core"},
+    {"path": "examples/custom-instances.md", "owner": "fx"},
+    {"path": "examples/custom-shaders.md", "owner": "fx"},
+    {"path": "examples/effect-gallery.md", "owner": "fx"},
+    {"path": "examples/nuke2.md", "owner": "fx"}
+  ]
+}

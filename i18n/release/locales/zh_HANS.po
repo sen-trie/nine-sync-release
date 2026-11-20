@@ -1,0 +1,16 @@
+# NineSync UI catalog. Generated layout: edit msgstr values only; see DEVELOPER_GUIDE.md#translations.
+msgid ""
+msgstr ""
+"Project-Id-Version: NineSync release\n"
+"Report-Msgid-Bugs-To: https://github.com/sen-trie/nine-sync-release/issues\n"
+"Language-Team: NineSync zh_HANS translators\n"
+"Language: zh_HANS\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-NineSync-Domain: release\n"
+
+#. kind: report
+#: __init__.py:62
+msgid "NineSync (combined) cannot start: %s already registered from another install. Disable that install, then enable this one; restarting Blender is recommended. Nothing was changed."
+msgstr ""

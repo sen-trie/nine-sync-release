@@ -1,0 +1,29 @@
+{
+  "locales": {
+    "ja_JP": "Japanese",
+    "zh_HANS": "Simplified Chinese"
+  },
+  "domains": {
+    "release": {
+      "owner": "nine-sync-release",
+      "source_root": "packaging/bundle",
+      "exclude": [],
+      "catalog_dir": "i18n/release",
+      "compiled": "packaging/bundle/translations.py"
+    },
+    "core": {
+      "owner": "nine-sync-core",
+      "source_root": "nine-sync-core",
+      "exclude": ["tests", "tools", "debug-src", "src", "docs", "i18n"],
+      "catalog_dir": "nine-sync-core/i18n",
+      "compiled": "nine-sync-core/i18n/translations.py"
+    },
+    "fx": {
+      "owner": "nine-sync-fx",
+      "source_root": "nine-sync-fx",
+      "exclude": ["tests", "tools", "debug-src", "docs", "i18n"],
+      "catalog_dir": "nine-sync-fx/i18n",
+      "compiled": "nine-sync-fx/i18n/translations.py"
+    }
+  }
+}
