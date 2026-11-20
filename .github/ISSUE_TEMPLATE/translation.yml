@@ -1,0 +1,48 @@
+name: Translation
+description: Submit a translation, report a wrong one, or ask about a term
+labels: ["translation", "needs-triage"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is it?
+      options:
+        - A translation (attach the .po file or link a branch)
+        - A wrong or unclear translation
+        - A terminology question
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language
+      options:
+        - Japanese (ja_JP)
+        - Simplified Chinese (zh_HANS)
+        - Other (say which below)
+    validations:
+      required: true
+  - type: dropdown
+    id: domain
+    attributes:
+      label: Which part?
+      options:
+        - Core interface (PMM Sync, PMM Create, Rigify Remap)
+        - FX interface (accessories, effects, bakes)
+        - Combined extension messages
+        - Documentation site
+        - README or other GitHub page
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: The English text, the current translation and your suggestion, or the term and where it appears. Attach .po files here.
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        How translations work: [DEVELOPER_GUIDE.md#translations](https://github.com/sen-trie/nine-sync-release/blob/main/DEVELOPER_GUIDE.md#translations). Use the [glossary](https://ninesync-docs.sentrie.workers.dev/translations/glossary/) for agreed terms.

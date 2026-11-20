@@ -97,7 +97,7 @@ def main(argv=None):
     # --- layout
     top = {n.split("/")[0] for n in names}
     rep.check("top-level layout", top <= {"blender_manifest.toml", "__init__.py", "LICENSE", "THIRD_PARTY_NOTICES.md",
-                                          "ninesync_core", "ninesync_fx"}, str(sorted(top)))
+                                          "preferences.py", "translations.py", "ninesync_core", "ninesync_fx"}, str(sorted(top)))
     bad = [n for n in names if (set(n.split("/")[:-1]) & FORBIDDEN_PARTS) or n.startswith(FORBIDDEN_PREFIXES)
            or any(fnmatch.fnmatch(n.split("/")[-1], p) for p in FORBIDDEN_NAMES)]
     rep.check("no developer-only, cache or credential files", not bad, str(bad[:10]))
@@ -109,6 +109,15 @@ def main(argv=None):
               "MMD_TOOLS_MIN_VERSION" in core_link and "REQUIRED_API" in core_link and "def mmd_tools_status" in core_link)
     rep.check("bundle entry point does not register mmd_tools",
               b"mmd_tools" not in re.sub(rb"(?m)^\s*#.*$", b"", data.get("__init__.py", b"")))
+    prefs_src = data.get("preferences.py", b"")
+    rep.check("bundle owns the one preferences class (marker set, class built from Core's and FX's properties)",
+              b"NINESYNC_PREFERENCES_OWNER = True" in data.get("__init__.py", b"")
+              and b"CorePreferenceProperties" in prefs_src and b"NineSyncFXPreferences" in prefs_src and b"mmd_tools" not in prefs_src)
+    compiled = ("translations.py", "ninesync_core/i18n/translations.py", "ninesync_fx/i18n/translations.py")
+    rep.check("each translation domain ships its compiled dictionary (Release, Core, FX)",
+              all(b"translations_dict = " in data.get(n, b"") and b"def register(owner)" in data.get(n, b"") for n in compiled),
+              str([n for n in compiled if n not in data]))
+    rep.check("no translation catalogs (.po/.pot) in the ZIP", not [n for n in names if n.endswith((".po", ".pot"))])
     rep.check("no duplicate paths", len(names) == len(set(names)))
 
     # --- versions

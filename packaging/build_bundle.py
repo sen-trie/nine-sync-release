@@ -286,7 +286,7 @@ def main(argv=None):
     stage.put(spec["dest"] + "/__init__.py",
               (IMPORTER_INIT % {"version": spec["version"], "repo": spec["upstream_repo"]}).encode("utf-8"), "build script")
 
-    for name in ("blender_manifest.toml", "__init__.py"):
+    for name in ("blender_manifest.toml", "__init__.py", "preferences.py", "translations.py"):
         with open(os.path.join(template, name), "rb") as handle:
             stage.put(name, handle.read(), "packaging/bundle")
     licence = open(os.path.join(ROOT, CHILDREN["core"], "LICENSE"), "rb").read()

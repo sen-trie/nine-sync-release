@@ -22,6 +22,8 @@ import urllib.request
 HERE = os.path.dirname(os.path.abspath(__file__))
 PKG_ID = "ninesync_bundled"
 MMD_ID = "mmd_tools"
+CORE_ID = "ninesync"
+FX_ID = "ninesync_fx"
 ROOT = os.path.dirname(HERE)
 
 
@@ -69,6 +71,7 @@ def main():
     parser.add_argument("--official", action="store_true")
     parser.add_argument("--mmd-tools-zip", help="mmd_tools extension ZIP to install as the external dependency (default: the pinned test fixture)")
     parser.add_argument("--cache", default=os.path.join(ROOT, "build", "downloads"))
+    parser.add_argument("--source-root", default=ROOT, help="checkout holding nine-sync-core and nine-sync-fx, built as the standalone copies of the mixed-install tests (default: this repository)")
     args = parser.parse_args()
     zip_path = os.path.abspath(args.zip)
     steps = []
@@ -108,6 +111,17 @@ def main():
             code, out = run(base + ["--command", "extension", "install-file", "-r", "user_default", mmd_zip], env)
             mmd_install = os.path.join(profile, "extensions", "user_default", MMD_ID)
             step("external mmd_tools installs (test fixture, not part of the ZIP)", code == 0 and os.path.isdir(mmd_install), out.strip()[-400:])
+            standalone = {}
+            for key, folder, ident in (("core", "nine-sync-core", CORE_ID), ("fx", "nine-sync-fx", FX_ID)):
+                built = os.path.join(profile, "standalone_" + key)
+                source = os.path.join(os.path.abspath(args.source_root), folder)
+                os.makedirs(built, exist_ok=True)
+                code, out = run(base + ["--command", "extension", "build", "--source-dir", source, "--output-dir", built], env)
+                archives = [n for n in os.listdir(built) if n.endswith(".zip")] if os.path.isdir(built) else []
+                if step("standalone %s builds from the same sources" % key, code == 0 and len(archives) == 1, out.strip()[-300:]):
+                    code, out = run(base + ["--command", "extension", "install-file", "-r", "user_default", os.path.join(built, archives[0])], env)
+                    standalone[key] = os.path.isdir(os.path.join(profile, "extensions", "user_default", ident))
+                    step("standalone %s installs next to the combined build (not enabled)" % key, standalone[key], out.strip()[-300:])
             if os.path.isdir(install) and os.path.isdir(mmd_install):
                 before = tree_hash(install)
                 mmd_before = tree_hash(mmd_install)
@@ -120,6 +134,20 @@ def main():
                 if os.path.isfile(smoke):
                     with open(smoke, encoding="utf-8") as handle:
                         report["smoke"] = json.load(handle)
+                if len(standalone) == 2 and all(standalone.values()):
+                    # Gate A: the four enable orders, preferences, restart; each is its own Blender process.
+                    for mode, flags in (("orders", ["--factory-startup"]), ("prefs-set", ["--factory-startup"]), ("prefs-check", [])):
+                        gate = os.path.join(profile, "gate_%s.json" % mode)
+                        code, out = run([args.blender, "-b"] + flags + ["--python-exit-code", "1", "--python", os.path.join(HERE, "blender_gate_a.py"), "--", mode, gate], env)
+                        lines = [l for l in out.splitlines() if l.startswith("GATE")]
+                        print("\n".join(lines))
+                        failing = "\n".join(l for l in lines if " FAIL " in l)
+                        step("Gate A %s inside Blender" % mode, code == 0 and os.path.isfile(gate), failing or out.strip()[-600:])
+                        if os.path.isfile(gate):
+                            with open(gate, encoding="utf-8") as handle:
+                                report.setdefault("gate_a", {})[mode] = json.load(handle)
+                else:
+                    step("Gate A needs the standalone copies", False, "standalone Core and FX did not both install")
                 step("install folder unchanged by use (ignoring __pycache__)", tree_hash(install) == before)
                 step("mmd_tools install folder unchanged by NineSync", tree_hash(mmd_install) == mmd_before)
                 code, out = run(base + ["--command", "extension", "remove", PKG_ID], env)

@@ -34,6 +34,53 @@ jobs:
       - run: |
           python -I packaging/test_update_components.py -v
           python -I packaging/test_release_notes.py -v
+          python -I packaging/test_i18n_tool.py -v
+
+  i18n:
+    name: Translation catalogs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: recursive
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Catalogs match the pinned sources, compiled dictionaries are current, placeholders agree
+        run: python -I packaging/i18n_tool.py check
+      - name: GNU gettext accepts every catalog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gettext
+          find i18n nine-sync-core/i18n nine-sync-fx/i18n -name '*.po' -print0 | xargs -0 -r -n1 msgfmt --check -o /dev/null
+      - name: Coverage
+        run: python -I packaging/i18n_tool.py coverage >> "$GITHUB_STEP_SUMMARY"
+
+  docs:
+    name: Documentation site
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: recursive
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - run: pip install -r zensical/requirements-docs.txt
+      - name: Every page has a translation owner
+        run: python -I zensical/scripts/docs_i18n.py inventory --check
+      - name: The changelog page matches the changelogs
+        run: python -I packaging/build_changelog.py --check
+      - name: Build (warnings fail)
+        working-directory: zensical
+        run: python -m zensical build --strict
 
   build:
     name: Build and statically validate
@@ -125,7 +172,7 @@ jobs:
 
   result:
     name: PR validation result
-    needs: [unit, build, validate]
+    needs: [unit, i18n, docs, build, validate]
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -133,10 +180,12 @@ jobs:
       - name: Every job must have succeeded
         env:
           UNIT: ${{ needs.unit.result }}
+          I18N: ${{ needs.i18n.result }}
+          DOCS: ${{ needs.docs.result }}
           BUILD: ${{ needs.build.result }}
           VALIDATE: ${{ needs.validate.result }}
         run: |
-          echo "unit=$UNIT build=$BUILD validate=$VALIDATE"
-          [ "$UNIT" = "success" ] && [ "$BUILD" = "success" ] || { echo "a required job did not succeed" >&2; exit 1; }
+          echo "unit=$UNIT i18n=$I18N docs=$DOCS build=$BUILD validate=$VALIDATE"
+          [ "$UNIT" = "success" ] && [ "$I18N" = "success" ] && [ "$DOCS" = "success" ] && [ "$BUILD" = "success" ] || { echo "a required job did not succeed" >&2; exit 1; }
           # Blender validation may be skipped only for the component PR (see its job condition).
           [ "$VALIDATE" = "success" ] || [ "$VALIDATE" = "skipped" ] || { echo "Blender validation failed" >&2; exit 1; }

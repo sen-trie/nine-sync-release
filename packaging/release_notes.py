@@ -2,7 +2,7 @@
 """Draft release notes for NineSync Bundled, built only from published facts.
 
     python -I packaging/release_notes.py draft --artifact-manifest dist/artifact-manifest.json --version v0.3.1 --out notes.md
-    python -I packaging/release_notes.py finalize --version 0.3.1 --date 2026-12-01      # edits CHANGELOG.md and docs/changelog.md
+    python -I packaging/release_notes.py finalize --version 0.3.1 --date 2026-12-01      # edits CHANGELOG.md and zensical/docs/changelog.md
 
 What goes in, and where it comes from:
   * Core / FX: the entries of every *published* component version after the one in the previous published Bundled
@@ -34,12 +34,15 @@ import update_components as uc  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHANGELOG = os.path.join(ROOT, "CHANGELOG.md")
-HEADING = re.compile(r"^##\s+\[?(Unreleased|v?\d+\.\d+\.\d+[^\]\s]*)\]?(?:\s*[-–(].*)?$", re.I)
+HEADING = re.compile(
+    r"^##\s+\[?(Unreleased|v?\d+\.\d+\.\d+[^\]\s]*)\]?(?:\s*[-–(].*)?$", re.I
+)
 BULLET_LIMIT = 220
 BODY_LIMIT = 60000
 
 
 # --- changelog parsing ----------------------------------------------------------------------------------------
+
 
 def parse_changelog(text):
     """{'unreleased': [bullets], (X, Y, Z): [bullets]}. Bullets keep wrapped lines joined; sub-headings are kept as bullets' group."""
@@ -50,7 +53,9 @@ def parse_changelog(text):
             bullet = None
             if match:
                 name = match.group(1)
-                current = "unreleased" if name.lower() == "unreleased" else uc.parse_tag(name)
+                current = (
+                    "unreleased" if name.lower() == "unreleased" else uc.parse_tag(name)
+                )
                 if current is not None:
                     sections.setdefault(current, [])
             else:
@@ -72,24 +77,39 @@ def parse_changelog(text):
 
 def condense(bullet):
     first = re.split(r"(?<=[.!?])\s+(?=[A-Z`])", bullet.strip(), maxsplit=1)[0]
-    return first if len(first) <= BULLET_LIMIT else first[:BULLET_LIMIT - 1].rstrip() + "…"
+    return (
+        first
+        if len(first) <= BULLET_LIMIT
+        else first[: BULLET_LIMIT - 1].rstrip() + "…"
+    )
 
 
 def in_range(sections, old, new):
     """Published versions v with old < v <= new that the changelog covers; sections above `new` are unreleased."""
-    return sorted((v for v in sections if v != "unreleased" and old < v <= new), reverse=True)
+    return sorted(
+        (v for v in sections if v != "unreleased" and old < v <= new), reverse=True
+    )
 
 
 # --- baseline: previous published Bundled release ---------------------------------------------------------------
 
+
 def previous_release(api, bundled, exclude_tag=None):
     """(release, artifact-manifest dict) of the newest published non-draft release, or (None, None)."""
-    releases = [r for r in api.get("/repos/%s/releases?per_page=30" % bundled)
-                if not r.get("draft") and r.get("published_at") and r.get("tag_name") != exclude_tag]
+    releases = [
+        r
+        for r in api.get("/repos/%s/releases?per_page=30" % bundled)
+        if not r.get("draft")
+        and r.get("published_at")
+        and r.get("tag_name") != exclude_tag
+    ]
     if not releases:
         return None, None
     release = max(releases, key=lambda r: r["published_at"])
-    asset = next((a for a in release.get("assets", []) if a["name"] == "artifact-manifest.json"), None)
+    asset = next(
+        (a for a in release.get("assets", []) if a["name"] == "artifact-manifest.json"),
+        None,
+    )
     if not asset:
         return release, None
     try:
@@ -100,32 +120,68 @@ def previous_release(api, bundled, exclude_tag=None):
 
 # --- notes ----------------------------------------------------------------------------------------------------------
 
+
 def component_section(api, cfg, key, old, new, commit):
     comp = cfg["components"][key]
     label, repo = comp["label"], comp["repository"]
     if old is None:
-        return ["### %s" % label, "", "Baseline unknown: changes are not enumerated. Included version: %s." % uc.fmt(new), ""]
+        return [
+            "### %s" % label,
+            "",
+            "Baseline unknown: changes are not enumerated. Included version: %s."
+            % uc.fmt(new),
+            "",
+        ]
     if new == old:
         return ["### %s" % label, "", "Unchanged (%s)." % uc.fmt(new), ""]
     if new < old:
-        return ["### %s" % label, "", "**Warning:** version goes from %s to %s (a downgrade); review before publishing." % (uc.fmt(old), uc.fmt(new)), ""]
+        return [
+            "### %s" % label,
+            "",
+            "**Warning:** version goes from %s to %s (a downgrade); review before publishing."
+            % (uc.fmt(old), uc.fmt(new)),
+            "",
+        ]
     out = ["### %s %s → %s" % (label, uc.fmt(old), uc.fmt(new)), ""]
     releases = {uc.parse_tag(r["tag_name"]): r for r in uc.eligible_releases(api, repo)}
     versions = sorted((v for v in releases if old < v <= new), reverse=True)
     if versions:
-        out += ["GitHub Releases: " + ", ".join("[%s](%s)" % (releases[v]["tag_name"], releases[v].get("html_url") or
-                "https://github.com/%s/releases/tag/%s" % (repo, releases[v]["tag_name"])) for v in versions), ""]
+        out += [
+            "GitHub Releases: "
+            + ", ".join(
+                "[%s](%s)"
+                % (
+                    releases[v]["tag_name"],
+                    releases[v].get("html_url")
+                    or "https://github.com/%s/releases/tag/%s"
+                    % (repo, releases[v]["tag_name"]),
+                )
+                for v in versions
+            ),
+            "",
+        ]
     try:
-        sections = parse_changelog(api.get_raw("/repos/%s/contents/CHANGELOG.md?ref=%s" % (repo, commit)).decode("utf-8"))
+        sections = parse_changelog(
+            api.get_raw(
+                "/repos/%s/contents/CHANGELOG.md?ref=%s" % (repo, commit)
+            ).decode("utf-8")
+        )
     except uc.ApiError:
-        return out + ["No CHANGELOG.md was found at the release commit; see the releases above.", ""]
+        return out + [
+            "No CHANGELOG.md was found at the release commit; see the releases above.",
+            "",
+        ]
     covered = in_range(sections, old, new)
     wanted = sorted((v for v in set(versions) | set(covered)), reverse=True)
     for version in wanted:
         bullets = sections.get(version)
         out.append("**%s**" % uc.fmt(version))
         out.append("")
-        out += ["- " + condense(b) for b in bullets] if bullets else ["- (no changelog entry was published for this version)"]
+        out += (
+            ["- " + condense(b) for b in bullets]
+            if bullets
+            else ["- (no changelog entry was published for this version)"]
+        )
         out.append("")
     if not wanted:
         out += ["No changelog entries were published for this range.", ""]
@@ -135,14 +191,31 @@ def component_section(api, cfg, key, old, new, commit):
 def dependency_changes(previous, current):
     out = []
     for name in sorted(set(previous) | set(current)):
-        before, after = (previous.get(name) or {}).get("version"), (current.get(name) or {}).get("version")
+        before, after = (previous.get(name) or {}).get("version"), (
+            current.get(name) or {}
+        ).get("version")
         if before != after:
-            out.append("- Bundled dependency `%s`: %s" % (name, "added %s" % after if before is None else
-                       "removed (was %s)" % before if after is None else "%s → %s" % (before, after)))
+            out.append(
+                "- Bundled dependency `%s`: %s"
+                % (
+                    name,
+                    (
+                        "added %s" % after
+                        if before is None
+                        else (
+                            "removed (was %s)" % before
+                            if after is None
+                            else "%s → %s" % (before, after)
+                        )
+                    ),
+                )
+            )
     return out
 
 
-def draft_notes(api, cfg, bundled, current, current_deps, unreleased, label, exclude_tag=None):
+def draft_notes(
+    api, cfg, bundled, current, current_deps, unreleased, label, exclude_tag=None
+):
     """current: {'core': {'version': tuple, 'commit': sha}, 'fx': {...}}; current_deps: {name: {'version': str}}."""
     release, manifest = previous_release(api, bundled, exclude_tag)
     old = {}
@@ -151,22 +224,39 @@ def draft_notes(api, cfg, bundled, current, current_deps, unreleased, label, exc
             old[key] = uc.parse_tag(manifest[key]["version"]) if manifest else None
         except (KeyError, TypeError):
             old[key] = None
-    lines = ["## NineSync %s" % label, ""]
+    lines = []
     if release is None:
-        lines += ["No earlier Bundled release was found, so there is no baseline to compare against.", ""]
+        lines += [
+            "No earlier Bundled release was found, so there is no baseline to compare against.",
+            "",
+        ]
     elif manifest is None:
-        lines += ["The previous release (%s) has no readable artifact-manifest.json, so component changes are not enumerated." % release["tag_name"], ""]
+        lines += [
+            "The previous release (%s) has no readable artifact-manifest.json, so component changes are not enumerated."
+            % release["tag_name"],
+            "",
+        ]
     for key in cfg["components"]:
-        lines += component_section(api, cfg, key, old[key], current[key]["version"], current[key]["commit"])
+        lines += component_section(
+            api, cfg, key, old[key], current[key]["version"], current[key]["commit"]
+        )
     lines += ["## Packaging", ""]
     bundled_lines = ["- " + b if not b.startswith("- ") else b for b in unreleased]
-    deps = dependency_changes((manifest or {}).get("dependencies", {}), current_deps) if manifest else []
+    deps = (
+        dependency_changes((manifest or {}).get("dependencies", {}), current_deps)
+        if manifest
+        else []
+    )
     if bundled_lines or deps:
         lines += bundled_lines + deps + [""]
     else:
         lines += ["No Bundled-specific changes were recorded.", ""]
     text = "\n".join(lines).rstrip() + "\n"
-    return text if len(text) <= BODY_LIMIT else text[:BODY_LIMIT].rsplit("\n", 1)[0] + "\n\n(truncated)\n"
+    return (
+        text
+        if len(text) <= BODY_LIMIT
+        else text[:BODY_LIMIT].rsplit("\n", 1)[0] + "\n\n(truncated)\n"
+    )
 
 
 def unreleased_of(text):
@@ -175,35 +265,67 @@ def unreleased_of(text):
 
 def pr_section(api, cfg, bundled, ref, targets):
     """Draft notes for the rolling PR (targets as built by update_components.select_targets)."""
-    current = {k: {"version": t["version"], "commit": t["commit"]} for k, t in targets.items()}
+    current = {
+        k: {"version": t["version"], "commit": t["commit"]} for k, t in targets.items()
+    }
     try:
-        changelog = api.get_raw("/repos/%s/contents/CHANGELOG.md?ref=%s" % (bundled, ref)).decode("utf-8")
+        changelog = api.get_raw(
+            "/repos/%s/contents/CHANGELOG.md?ref=%s" % (bundled, ref)
+        ).decode("utf-8")
     except uc.ApiError:
         changelog = ""
     try:
-        lock = json.loads(api.get_raw("/repos/%s/contents/packaging/dependencies.lock?ref=%s" % (bundled, ref)))["components"]
+        lock = json.loads(
+            api.get_raw(
+                "/repos/%s/contents/packaging/dependencies.lock?ref=%s" % (bundled, ref)
+            )
+        )["components"]
     except (uc.ApiError, ValueError, KeyError):
         lock = {}
-    return draft_notes(api, cfg, bundled, current, lock, unreleased_of(changelog), "(next release)")
+    return draft_notes(
+        api, cfg, bundled, current, lock, unreleased_of(changelog), "(next release)"
+    )
 
 
 # --- command line -------------------------------------------------------------------------------------------------------
+
 
 def finalize(path, version, date):
     """Move [Unreleased] under `## version - date`, keeping everything else (history) byte for byte."""
     with open(path, encoding="utf-8") as handle:
         text = handle.read()
     lines = text.splitlines(keepends=True)
-    start = next((i for i, l in enumerate(lines) if re.match(r"^##\s+\[?unreleased\]?\s*$", l.strip(), re.I)), None)
+    start = next(
+        (
+            i
+            for i, l in enumerate(lines)
+            if re.match(r"^##\s+\[?unreleased\]?\s*$", l.strip(), re.I)
+        ),
+        None,
+    )
     if start is None:
         raise uc.Failure("CHANGELOG.md has no [Unreleased] section")
     if re.search(r"^##\s+\[?v?%s\]?\b" % re.escape(version.lstrip("v")), text, re.M):
         raise uc.Failure("CHANGELOG.md already has a section for %s" % version)
-    end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("## ")), len(lines))
-    body = "".join(lines[start + 1:end]).strip("\n")
+    end = next(
+        (i for i in range(start + 1, len(lines)) if lines[i].startswith("## ")),
+        len(lines),
+    )
+    body = "".join(lines[start + 1 : end]).strip("\n")
     if not body.strip():
         raise uc.Failure("[Unreleased] is empty; nothing to finalize")
-    new = lines[:start] + ["## [Unreleased]\n", "\n", "## [%s] - %s\n" % (version.lstrip("v"), date), "\n", body + "\n", "\n"] + lines[end:]
+    new = (
+        lines[:start]
+        + [
+            "## [Unreleased]\n",
+            "\n",
+            "## [%s] - %s\n" % (version.lstrip("v"), date),
+            "\n",
+            body + "\n",
+            "\n",
+        ]
+        + lines[end:]
+    )
     with open(path, "w", encoding="utf-8", newline="\n") as handle:
         handle.write("".join(new))
 
@@ -213,7 +335,9 @@ def main(argv=None):
     sub = parser.add_subparsers(dest="cmd", required=True)
     dp = sub.add_parser("draft")
     dp.add_argument("--artifact-manifest", required=True)
-    dp.add_argument("--version", required=True, help="label for the release, e.g. the tag")
+    dp.add_argument(
+        "--version", required=True, help="label for the release, e.g. the tag"
+    )
     dp.add_argument("--out", required=True)
     fp = sub.add_parser("finalize")
     fp.add_argument("--version", required=True)
@@ -226,21 +350,44 @@ def main(argv=None):
             finalize(CHANGELOG, args.version, args.date)
             print("CHANGELOG.md finalized for", args.version)
             # The wiki changelog is generated from CHANGELOG.md, so regenerate it in the same step; both files then go in one commit.
-            built = subprocess.run([sys.executable, "-I", os.path.join(ROOT, "packaging", "build_changelog.py")], check=False)
+            built = subprocess.run(
+                [
+                    sys.executable,
+                    "-I",
+                    os.path.join(ROOT, "packaging", "build_changelog.py"),
+                ],
+                check=False,
+            )
             if built.returncode != 0:
-                raise uc.Failure("CHANGELOG.md was finalized but docs/changelog.md could not be regenerated")
+                raise uc.Failure(
+                    "CHANGELOG.md was finalized but zensical/docs/changelog.md could not be regenerated"
+                )
             return 0
         cfg = uc.load_config()
         api = uc.GitHub(os.environ.get("GH_TOKEN", ""))
         with open(args.artifact_manifest, encoding="utf-8") as handle:
             built = json.load(handle)
-        current = {k: {"version": uc.parse_tag(built[k]["version"]), "commit": built[k]["commit"]} for k in cfg["components"]}
+        current = {
+            k: {
+                "version": uc.parse_tag(built[k]["version"]),
+                "commit": built[k]["commit"],
+            }
+            for k in cfg["components"]
+        }
         if any(v["version"] is None for v in current.values()):
             raise uc.Failure("artifact manifest has no X.Y.Z component versions")
         with open(CHANGELOG, encoding="utf-8") as handle:
             unreleased = unreleased_of(handle.read())
-        text = draft_notes(api, cfg, os.environ["GITHUB_REPOSITORY"], current, built.get("dependencies", {}), unreleased,
-                           args.version, exclude_tag=args.version)
+        text = draft_notes(
+            api,
+            cfg,
+            os.environ["GITHUB_REPOSITORY"],
+            current,
+            built.get("dependencies", {}),
+            unreleased,
+            args.version,
+            exclude_tag=args.version,
+        )
         with open(args.out, "w", encoding="utf-8", newline="\n") as handle:
             handle.write(text)
         print("wrote", args.out)

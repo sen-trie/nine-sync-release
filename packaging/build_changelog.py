@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Generates docs/changelog.md from the changelogs of the release repo, Core and FX, so the manual never keeps a copy that can
+# Generates zensical/docs/changelog.md from the changelogs of the release repo, Core and FX, so the manual never keeps a copy that can
 # drift. Run it from anywhere: python packaging/build_changelog.py [--check]
 # A version is "released" when its component has a v<version> tag or it is not newer than the version the latest bundled
 # release includes; anything else is shown as upcoming. Dates come from the tag, or from the commit that added the version
@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-OUTPUT = ROOT / "docs" / "changelog.md"
+OUTPUT = ROOT / "zensical" / "docs" / "changelog.md"
 SCRIPT_VERSION = 1
 COMPONENTS = (
     ("core", "Core", ROOT / "nine-sync-core"),
@@ -151,7 +151,9 @@ def main(check=False):
             "--",
             "CHANGELOG.md",
         ).splitlines()
-        entry["date"] = entry["date"] or (stamp[-1] if stamp else "")
+        tag = "v" + entry["version"]
+        tagged = git(ROOT, "log", "-1", "--format=%as", tag) if git(ROOT, "tag", "-l", tag) else ""
+        entry["date"] = entry["date"] or tagged or (stamp[-1] if stamp else "")
         records.append(("bundle", "Bundled release", entry, True, ""))
     for kind, label, repo in COMPONENTS:
         pinned = pins.get(kind)
@@ -171,7 +173,11 @@ def main(check=False):
                 (kind, label, entry, released, bundled_by.get(entry["version"], ""))
             )
     records.sort(
-        key=lambda r: (r[2]["date"] or "9999", version_key(r[2]["version"])),
+        key=lambda r: (
+            r[2]["date"] or "9999",
+            r[0] == "bundle",
+            version_key(r[2]["version"]),
+        ),
         reverse=True,
     )
     lines = [
