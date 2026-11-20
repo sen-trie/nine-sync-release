@@ -1,0 +1,112 @@
+[project]
+site_name = "NineSync Documentation"
+site_description = "Guides and manuals for NineSync, the MMD-to-Blender extension"
+site_url = "https://ninesync-docs.sentrie.workers.dev/"
+docs_dir = "docs"
+site_dir = "site"
+repo_url = "https://github.com/sen-trie/nine-sync-release"
+repo_name = "nine-sync-release"
+edit_uri = "edit/main/zensical/docs/"
+extra_css = ["https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css", "assets/extra.css", "assets/components.css"]
+extra_javascript = ["https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js", "assets/math.js", "assets/changelog.js", "assets/pagenav.js", "assets/compare.js"]
+
+# Navigation: "Manual" holds the features, each indented under it; a feature's own pages and its "How ... Works" group are
+# indented under the feature, with the technical pages last. "Examples" follows the Manual. navigation.expand keeps those
+# levels open so every page is visible without clicking.
+nav = [
+  { "Introduction" = [
+    "index.md",
+    "installation.md",
+    "changelog.md",
+    { "Who is this addon for?" = "motivation.md" },
+    "disclaimer.md",
+  ] },
+  { "Manual" = [
+    "manual/index.md",
+    { "PMM Create" = [
+      "manual/core/pmm-create/index.md",
+      { "Compatibility Matrix" = "manual/core/pmm-create/compatibility.md" },
+    ] },
+    { "PMM Sync" = [
+      "manual/core/pmm-sync/index.md",
+      { "PMM Reading and Writing" = "manual/core/pmm-sync/reading-and-writing.md" },
+      { "Synchronization" = "manual/core/pmm-sync/synchronization.md" },
+      { "Accessories and Effects in a PMM Sync" = "manual/core/pmm-sync/accessories-and-effects.md" },
+      { "How PMM Sync Works" = [
+        "manual/core/pmm-sync/how-it-works/index.md",
+        { "Parsing" = "manual/core/pmm-sync/how-it-works/parsing.md" },
+        { "Animation Conversion" = "manual/core/pmm-sync/how-it-works/animation-conversion.md" },
+        { "Incremental Sync" = "manual/core/pmm-sync/how-it-works/incremental-sync.md" },
+        { "IK, Bone Morphs and Outside Parents" = "manual/core/pmm-sync/how-it-works/ik-morphs-parents.md" },
+        { "Accessory and FX Integration" = "manual/core/pmm-sync/how-it-works/accessory-fx-integration.md" },
+      ] },
+    ] },
+    { "Rigify Remap" = [
+      "manual/core/rigify-remap/index.md",
+      { "Creating Rigify Rig from MMD" = "manual/core/rigify-remap/creating-rigify-rig.md" },
+      { "How Rigify Remap Works" = [
+        "manual/core/rigify-remap/how-it-works/index.md",
+        { "Baking a Remap" = "manual/core/rigify-remap/how-it-works/baking.md" },
+      ] },
+    ] },
+    { "FX Import" = [
+      "manual/fx/index.md",
+      { "Getting Started" = "manual/fx/import.md" },
+      { "Geometry Nodes Setup" = [
+        "manual/fx/geometry-nodes/index.md",
+        { "Generated Attributes" = "manual/fx/geometry-nodes/generated-attributes.md" },
+      ] },
+      { "Shader Nodes Setup" = "manual/fx/shader-nodes.md" },
+      { "How FX Works" = [
+        "manual/fx/how-it-works/index.md",
+        { "MME Translation to Geometry Nodes" = "manual/fx/how-it-works/geometry-nodes-translation.md" },
+        { "Shader Translation" = "manual/fx/how-it-works/shader-translation.md" },
+        { "Culling and Geometry Optimization" = "manual/fx/how-it-works/culling.md" },
+        { "Cache Architecture" = "manual/fx/how-it-works/cache.md" },
+        { "Shared Node Library" = "manual/fx/how-it-works/shared-library.md" },
+      ] },
+    ] },
+    { "Examples" = [
+      "examples/index.md",
+      { "MMD and Blender Collaboration" = "examples/collaboration.md" },
+      { "Custom Geometry Nodes with Instances" = "examples/custom-instances.md" },
+      { "Custom Shaders with Noise and Voronoi" = "examples/custom-shaders.md" },
+      { "Setting Up Rigify and Importing VMD Motion" = "examples/rigify-vmd.md" },
+      { "Preparing a Blender Scene for Export to MMD" = "examples/export-to-mmd.md" },
+      { "Nuke2: An Animated Smoke Effect" = "examples/nuke2.md" },
+      { "Effect Compatibility Gallery" = "examples/effect-gallery.md" },
+    ] },
+  ] },
+  { "Common Issues" = "issues.md" },
+  { "FAQ" = "faq.md" },
+  { "Reporting and Triage" = "triage.md" },
+  { "Contributors Wanted" = "contributors.md" },
+  { "Translation Glossary" = "translations/glossary.md" },
+  "credits.md",
+]
+
+[project.theme]
+custom_dir = "overrides"
+variant = "modern"
+features = [
+  "navigation.sections",
+  "navigation.indexes",
+  "navigation.expand",
+  "navigation.footer",
+  "toc.follow",
+  "content.action.edit",
+  "content.action.view",
+  "content.code.copy",
+]
+font.text = "Nunito"
+logo = "assets/logo-single.png"
+favicon = "assets/favicon.png"
+
+[[project.theme.palette]]
+scheme = "slate"
+primary = "light blue"
+accent = "cyan"
+
+# Images open in the lightbox that Zensical provides (GLightbox). Images with these classes are left alone.
+[project.plugins.glightbox]
+skip_classes = ["no-lightbox"]

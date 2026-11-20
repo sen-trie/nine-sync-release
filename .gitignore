@@ -10,3 +10,5 @@ agent/
 *.zip
 working/
 site/
+zensical/site/
+zensical/.build/

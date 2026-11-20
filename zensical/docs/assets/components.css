@@ -1,0 +1,401 @@
+/* Components added with the Examples section: image lightbox, comparison slider, media placeholders and equations.
+   Behaviour lives in lightbox.js and compare.js. */
+
+/* ------------------------------------------------------------------ */
+/* Image lightbox                                                     */
+/* ------------------------------------------------------------------ */
+.ns-zoom {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  line-height: 0;
+  cursor: zoom-in;
+  vertical-align: top;
+  border-radius: 0.15rem;
+}
+.ns-zoom > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.ns-zoom:focus-visible {
+  outline: 2px solid var(--md-accent-fg-color);
+  outline-offset: 2px;
+}
+.ns-zoom-badge {
+  position: absolute;
+  right: 0.4rem;
+  bottom: 0.4rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(15, 17, 22, 0.62);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+  opacity: 0.8;
+  pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.ns-zoom-badge svg {
+  width: 1rem;
+  height: 1rem;
+}
+.ns-zoom:hover .ns-zoom-badge,
+.ns-zoom:focus-visible .ns-zoom-badge {
+  opacity: 1;
+  transform: scale(1.1);
+}
+.md-typeset table .ns-zoom {
+  display: block;
+}
+.md-typeset table:not([class]) td .ns-zoom > img {
+  width: 100%;
+}
+.ns-renders table td .ns-zoom > img {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  width: 100%;
+}
+.md-typeset figure {
+  margin: 1.2rem auto;
+}
+.md-typeset figure figcaption {
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--md-default-fg-color--light);
+  margin-top: 0.4rem;
+}
+
+.ns-lb {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  background: rgba(6, 8, 12, 0.92);
+  color: #fff;
+}
+.ns-lb[hidden] {
+  display: none;
+}
+html.ns-lb-open {
+  overflow: hidden;
+}
+.ns-lb-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  padding-top: max(0.5rem, env(safe-area-inset-top));
+  background: rgba(0, 0, 0, 0.4);
+}
+.ns-lb-caption {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.75rem;
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ns-lb-tools {
+  display: flex;
+  gap: 0.25rem;
+  flex: none;
+}
+.ns-lb-btn {
+  min-width: 2.2rem;
+  height: 2.2rem;
+  padding: 0 0.4rem;
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 0.35rem;
+  cursor: pointer;
+}
+.ns-lb-btn:hover:not(:disabled),
+.ns-lb-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.22);
+  outline: none;
+  border-color: var(--md-accent-fg-color);
+}
+.ns-lb-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.ns-lb-btn[hidden] {
+  display: none;
+}
+.ns-lb-stage {
+  position: relative;
+  flex: 1 1 auto;
+  overflow: hidden;
+  touch-action: none;
+  cursor: zoom-out;
+}
+.ns-lb-stage.ns-lb-zoomed {
+  cursor: grab;
+}
+.ns-lb-stage.ns-lb-dragging {
+  cursor: grabbing;
+}
+.ns-lb-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: none;
+  transform-origin: 0 0;
+  user-select: none;
+  -webkit-user-drag: none;
+  cursor: default;
+  background: repeating-conic-gradient(#2a2d34 0% 25%, #22252b 0% 50%) 0 0 / 16px 16px;
+}
+.ns-lb-node {
+  display: none;
+}
+.ns-lb-compare .ns-lb-img {
+  display: none;
+}
+.ns-lb-compare .ns-lb-node {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  cursor: default;
+}
+.ns-lb-compare .ns-lb-stage {
+  cursor: default;
+}
+.ns-lb-compare .ns-lb-tools .ns-lb-out,
+.ns-lb-compare .ns-lb-tools .ns-lb-in,
+.ns-lb-compare .ns-lb-tools .ns-lb-fit {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Before/after comparison                                            */
+/* ------------------------------------------------------------------ */
+figure.ns-compare {
+  display: block;
+  width: 100%;
+  margin: 1.2rem 0;
+}
+.ns-compare-frame {
+  --ns-pos: 50%;
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--ns-ratio, 16 / 9);
+  overflow: hidden;
+  border-radius: 0.3rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  background: #0b0c0f;
+  touch-action: pan-y;
+  cursor: ew-resize;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.ns-compare-large {
+  width: min(94vw, calc((100vh - 6rem) * 1.7778));
+  max-width: 100%;
+}
+.ns-compare-pane {
+  position: absolute;
+  inset: 0;
+}
+.ns-compare-pane img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+  max-width: none;
+}
+.ns-compare-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  text-align: center;
+  padding: 1rem;
+  color: var(--md-default-fg-color--light);
+  background: repeating-linear-gradient(135deg, rgba(111, 139, 249, 0.1) 0 12px, rgba(111, 139, 249, 0.04) 12px 24px);
+}
+.ns-compare-b .ns-compare-placeholder {
+  background: repeating-linear-gradient(135deg, rgba(63, 184, 175, 0.1) 0 12px, rgba(63, 184, 175, 0.04) 12px 24px);
+}
+.ns-compare-placeholder strong {
+  font-size: 0.8rem;
+  color: var(--md-default-fg-color);
+}
+.ns-compare-placeholder span {
+  font-size: 0.65rem;
+}
+.ns-compare-label {
+  position: absolute;
+  top: 0.5rem;
+  padding: 0.12rem 0.5rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: rgba(10, 12, 16, 0.7);
+  border-radius: 0.6rem;
+  pointer-events: none;
+  max-width: 45%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ns-compare-label-a {
+  left: 0.5rem;
+}
+.ns-compare-label-b {
+  right: 0.5rem;
+}
+.ns-compare-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--ns-pos);
+  width: 2px;
+  margin-left: -1px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  outline: none;
+}
+.ns-compare-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2rem;
+  height: 2rem;
+  margin: -1rem 0 0 -1rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
+.ns-compare-knob::before,
+.ns-compare-knob::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  margin-top: -0.3rem;
+  border: 0.3rem solid transparent;
+}
+.ns-compare-knob::before {
+  left: 0.25rem;
+  border-right-color: #1d2026;
+}
+.ns-compare-knob::after {
+  right: 0.25rem;
+  border-left-color: #1d2026;
+}
+.ns-compare-handle:focus-visible .ns-compare-knob {
+  outline: 3px solid var(--md-accent-fg-color);
+}
+.ns-compare-expand {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  padding: 0.25rem;
+  color: #fff;
+  background: rgba(15, 17, 22, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0.3rem;
+  cursor: pointer;
+}
+.ns-compare-expand:hover,
+.ns-compare-expand:focus-visible {
+  background: rgba(15, 17, 22, 0.92);
+  border-color: var(--md-accent-fg-color);
+  outline: none;
+}
+.ns-compare-expand svg {
+  width: 100%;
+  height: 100%;
+}
+.ns-compare-expanded {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* ------------------------------------------------------------------ */
+/* Media placeholders and equations                                   */
+/* ------------------------------------------------------------------ */
+.ns-media {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  min-height: 9rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  text-align: center;
+  color: var(--md-default-fg-color--light);
+  border: 2px dashed var(--md-default-fg-color--lighter);
+  border-radius: 0.4rem;
+  background: repeating-linear-gradient(135deg, rgba(111, 139, 249, 0.07) 0 14px, transparent 14px 28px);
+}
+.ns-media strong {
+  color: var(--md-default-fg-color);
+  font-size: 0.8rem;
+}
+.ns-media span {
+  font-size: 0.68rem;
+}
+.ns-media-hero {
+  min-height: 14rem;
+}
+.ns-eq {
+  margin: 1rem 0;
+  padding: 0.6rem 1rem;
+  overflow-x: auto;
+  text-align: center;
+  font-family: "Cambria Math", "STIX Two Math", "Latin Modern Math", Georgia, serif;
+  font-size: 0.95rem;
+  line-height: 1.9;
+  background: var(--md-code-bg-color);
+  border-radius: 0.2rem;
+}
+.ns-eq var {
+  font-style: italic;
+}
+
+.ns-compare-a .ns-compare-placeholder {
+  padding-right: 52%;
+}
+.ns-compare-b .ns-compare-placeholder {
+  padding-left: 52%;
+}
+
+.arch-figure {
+  overflow-x: auto;
+}
+.arch-figure p {
+  margin: 0;
+}
+.arch-figure img {
+  display: block;
+  width: 100%;
+  min-width: 760px;
+  height: auto;
+}
+.arch-figure.workflow-figure img {
+  min-width: 640px;
+}

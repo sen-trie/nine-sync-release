@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.0]
+
+- The UI of the combined extension is now translatable.
+- Added Developer Guide, a translation glossary, a Translation issue template and catalog checks to support contributors.
+
 ## [0.2.0]
 
 - Expanded the documentation wiki.

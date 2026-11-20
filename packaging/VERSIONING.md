@@ -1,15 +1,14 @@
 # Bundled versioning
 
-The Bundled extension (`nine-sync-<version>-blender-extensions.zip`) has its own version, independent of Core and FX.
-Core and FX are also versioned independently of each other. No build or update check compares the three numbers.
+The combined NineSync extension, Core and FX have **independent versions**. Builds never require their numbers to match. The component-update PR bumps the Bundled version according to the highest-level change in Core or FX:
 
-The Bundled version is raised automatically by the component-update PR (at the highest level any component moved),
-or by hand for Bundled-only changes (`packaging/bundle/blender_manifest.toml` and `BUNDLE_VERSION` in
-`packaging/bundle/__init__.py`, which must match) following Core and FX:
+| Change | Bundled bump |
+| --- | --- |
+| Core/FX major release | Major |
+| Core/FX minor release | Minor |
+| Core/FX patch release | Patch |
+| Bundled-only packaging, dependency or integration change | Patch |
 
-- **Major**: raised only when Core or FX raises its major.
-- **Minor**: raised only when Core or FX raises its minor.
-- **Patch**: Bundled-only changes (packaging, dependencies, integration) and Core/FX patch releases.
+Major bumps reset minor and patch to zero; minor bumps reset patch to zero. Bundled-only changes must not trigger major or minor bumps.
 
-A major bump resets minor and patch to 0; a minor bump resets patch to 0. The Bundled version never moves ahead of
-what Core and FX did: it is not raised for its own sake on a major or minor.
+Update both `packaging/bundle/blender_manifest.toml` and `BUNDLE_VERSION` in `packaging/bundle/__init__.py`; they must match.

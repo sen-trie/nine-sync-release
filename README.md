@@ -1,10 +1,8 @@
 <p align="center">
-  <img src="docs/assets/logo.png" alt="NineSync" width="420">
+  <img src="zensical/docs/assets/logo.png" alt="NineSync" width="420">
 </p>
 
-# ⑨-Sync
-
-NineSync brings MikuMikuDance (MMD) projects into Blender. Import and sync PMM projects, including model animations, morphs, cameras, lighting, audio, accessories and MME effects.
+NineSync brings MikuMikuDance (MMD) projects into Blender. Import and sync PMM projects, including model animations, morphs, cameras, lighting, audio, accessories and certain MME effects.
 
 ## Project Scope
 
@@ -44,6 +42,10 @@ Guides and manuals: [ninesync-docs.sentrie.workers.dev](https://ninesync-docs.se
 
 Check the wiki for more details.
 
+## Contributing
+
+Report problems in this repository's issue tracker. To change code, open a pull request in the repository that owns it: [nine-sync-core](https://github.com/sen-trie/nine-sync-core) or [nine-sync-fx](https://github.com/sen-trie/nine-sync-fx). Documentation, packaging, translations and release changes belong here. See [CONTRIBUTING.md](CONTRIBUTING.md) for the short version and the [Developer Guide](DEVELOPER_GUIDE.md) for setup, architecture, tests, translations and the use of AI coding tools.
+
 ## License
 
-GPL-3.0-or-later. See `LICENSE`.
+Copyright 2026 sentrie. GPL-3.0-or-later. See `LICENSE`.

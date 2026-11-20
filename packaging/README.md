@@ -1,78 +1,37 @@
 # Packaging
 
-Scripts that build and check the combined NineSync Blender extension. Standard library Python only.
+Build and release tools for the combined NineSync Blender extension. Scripts use Python's standard library only.
 
-| File | Purpose |
+| Files | Purpose |
 | --- | --- |
-| `build_bundle.py` | Builds the deterministic ZIP, `.sha256` and `artifact-manifest.json` from the pinned submodules and `dependencies.lock` |
-| `validate_bundle.py` | Static checks (structure, manifest, versions, licences, hooks, syntax, private paths) |
-| `validate_in_blender.py`, `blender_smoke.py` | Install into an isolated profile and test inside Blender 5.3+ |
-| `fetch_blender.py` | Downloads an official Blender release and verifies its checksum; never substitutes another version |
-| `VERSIONING.md` | How the Bundled version relates to Core and FX versions |
-| `check_publish_gates.py` | Stable release check (static + official-Blender validation of the exact ZIP, clean manifest) |
-| `check_experimental.py`, `experimental_notes.py` | Experimental pre-release checks and notes (no Blender run) |
-| `extension_repo.py` | Assembles the GitHub Pages extension repository (Blender `extension server-generate`) and verifies the public index and ZIP |
-| `release_gates.json` | Website and copyright confirmations, read by the experimental path only |
-| `update_components.py`, `components.json` | Rolling Core + FX dependency PR (never merges or releases) |
+| `build_bundle.py`, `validate_bundle.py` | Build a reproducible ZIP, checksums and manifest; check structure, dependencies, licences and source integrity |
+| `validate_in_blender.py`, `blender_smoke.py`, `fetch_blender.py` | Validate installation with an isolated profile and an official Blender 5.3+ build |
+| `check_publish_gates.py`, `extension_repo.py` | Check stable release eligibility; assemble and verify the GitHub Pages extension repository |
+| `check_experimental.py`, `experimental_notes.py`, `release_gates.json` | Check experimental releases and required acknowledgements |
+| `update_components.py`, `components.json` | Prepare Core/FX pin updates as PRs; never merge or release automatically |
+| `dependencies.lock`, `test_fixtures.lock`, `VERSIONING.md` | Pinned dependencies, test-only fixtures and Bundled versioning rules |
 
-## Stable release (`.github/workflows/release.yml`)
+## Stable releases
 
-Starts automatically on a push to `main` that changes a submodule pin or the Bundled manifest (merging the
-component-update PR does), and by manual dispatch. Both paths build, validate, create the **draft** and, after the
-`extension-repository` approval, add the ZIP to the extension repository. Builds, validates statically, validates inside an official Blender 5.3 or newer, creates a **draft**
-release tagged `v<bundle version>` (the `create_draft_release` box, on by default) and adds the exact validated ZIP to
-the extension repository. Every run needs a passing Blender validation of that ZIP, and a person approves the `release`
-and `extension-repository` environments. The tag comes from `packaging/bundle/blender_manifest.toml`; the run fails early
-if a published release or the tag already exists; an unpublished draft with the same tag is replaced. Unchanged by the experimental path.
+`.github/workflows/release.yml` runs when a component pin or Bundled manifest changes on `main`, or by manual dispatch.
 
-### Extension repository on GitHub Pages
+1. Build the ZIP from clean, pinned sources; run static checks and installation tests in an official Blender 5.3+.
+2. After `release` approval, create a **draft** GitHub Release tagged from `bundle/blender_manifest.toml`. A published tag cannot be reused; an existing unpublished draft may be replaced.
+3. After `extension-repository` approval, rebuild the GitHub Pages repository using verified previously published ZIPs plus the new ZIP. Reject prereleases, version downgrades, conflicting IDs and changed ZIPs for existing versions.
+4. Deploy to Pages and verify the public `index.json` and ZIP over HTTPS against the validated artifact. A person publishes the draft release.
 
-Runs on every release run, after validation. Jobs:
+Published versions remain available. To roll back, publish a corrected newer version; do not overwrite an existing ZIP.
 
-1. `assemble-repository` (environment `extension-repository`, the manual approval): re-runs `check_publish_gates.py`, fetches an
-   official Blender, then `extension_repo.py assemble` downloads every version already served at the Pages URL (each checked
-   against the hash its own index advertises), adds the new ZIP, and runs Blender's `extension server-generate --html`.
-   It refuses pre-release versions, a changed ZIP under an already published version, an older version, and a different
-   extension id. The result is uploaded as the Pages artifact.
-2. `deploy-repository` (environment `github-pages`): `actions/deploy-pages`.
-3. `verify-repository`: fetches the public `index.json` and ZIP over HTTPS and compares them with the release ZIP
-   (retries while Pages propagates). The run is only green if the public files match.
+## Experimental releases
 
-The Pages site is rebuilt from the previously served versions plus the new one, so no content branch is kept. The base
-URL is `https://<owner>.github.io/<repo>/`, derived from the repository, or the `EXTENSION_REPO_URL` repository variable
-(custom domain). Rolling back means deploying a corrected newer version; the workflow never deletes a published version.
+`.github/workflows/experimental-release.yml` is **manual only** (for example, `v0.1.0-alpha.1`). It runs the same build and static checks, but **does not test in Blender**.
 
-## Experimental release (`.github/workflows/experimental-release.yml`)
+- Inputs: `release_tag`, `acknowledge=EXPERIMENTAL`, and `publish` (optional).
+- Publishing requires `experimental-release` environment approval and creates a GitHub **pre-release** marked as unvalidated in Blender.
+- Existing tags are untouched. The prerelease tag does not change the version inside the ZIP.
+- Experimental builds never enter the GitHub Pages extension repository; stable releases use `release.yml`.
 
-For the first bundled prerelease, e.g. `v0.1.0-alpha.1`. Manual dispatch only.
+## Dependencies
 
-1. Same `build_bundle.py` and `validate_bundle.py` as the stable path. No Blender is run.
-2. Still enforced: prerelease tag format, clean pinned sources, dependency hashes, manifest, licence files,
-   ZIP/`.sha256`/artifact-manifest agreement, and the website and copyright gates.
-3. Not required: Blender install tests, official Blender 5.3 validation, the install-test gate.
-4. Inputs: `release_tag`, `acknowledge` (must be the word `EXPERIMENTAL`), `publish` (off = build and check only).
-5. Publishing runs in the `experimental-release` environment. Configure required reviewers on it in the repository
-   settings: that approval is the explicit manual step. The release is created as a **Pre-release** whose notes
-   say the extension is not validated in Blender. An existing tag is never touched.
-6. The tag is only a label: the extension inside the ZIP keeps the version in `bundle/blender_manifest.toml`
-   (currently 0.1.0; see `VERSIONING.md`).
-
-Stable releases must not use prerelease tags; promote only through `release.yml`. Experimental builds never enter the
-GitHub Pages extension repository: this workflow has no deployment job and `extension_repo.py` rejects non-`X.Y.Z` versions.
-
-## Bundled DirectX `.x` importer
-
-Vendored from io_directx_x 1.4.0 (GPL-3.0-or-later), upstream https://github.com/SaintBaron/io_directx_x, maintainer
-SaintBaron. Only `importer.py`, `parser.py` and `LICENSE` are included, plus a generated `__init__.py` exposing
-`import_x`. The pin is the SHA-256 of the extensions.blender.org archive in `dependencies.lock`
-(`cfb8db604f4e6c0e6569e57110659667d55a0cd37ca03b445028bb6fbc968765`); upstream publishes no tag or commit id in
-that archive. The files carry no per-file copyright line, so attribution is the maintainer name, source URL and
-the full licence text, all listed in the generated `THIRD_PARTY_NOTICES.md`.
-
-## mmd_tools is external
-
-The combined ZIP contains no mmd_tools. Core finds the user's installed mmd_tools through its registered operators and
-checks its version (>= 4.5.5, `MMD_TOOLS_MIN_VERSION` in Core's `sync/mmd_tools_link.py`) and the API Core calls
-(`REQUIRED_API`). `validate_bundle.py` fails the build if any mmd_tools file is present or the entry point mentions
-mmd_tools. `test_fixtures.lock` pins the mmd_tools 4.5.5 release archive (SHA-256) that `validate_in_blender.py` installs
-into its isolated profile; it is test-only.
+- **DirectX `.x` importer:** Bundles `importer.py`, `parser.py` and `LICENSE` from [io_directx_x 1.4.0](https://github.com/SaintBaron/io_directx_x), plus a generated entry point. The archive SHA-256 is pinned in `dependencies.lock`; attribution and licensing appear in generated `THIRD_PARTY_NOTICES.md`.
+- **mmd_tools:** Core requires a separately installed mmd_tools **4.5.5+** and checks its APIs. `test_fixtures.lock` pins a test-only copy for isolated Blender validation.

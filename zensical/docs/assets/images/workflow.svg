@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" font-family="Nunito, Arial, sans-serif" viewBox="0 0 920 505" role="img" aria-labelledby="wf-title wf-desc">
+<title id="wf-title">MMD and Blender animation workflow</title>
+<desc id="wf-desc">The storyboard leads to initial blocking in Blender, then Blender animation, layered animation using NLA, and lighting, rendering and compositing. NineSync Core exports the initial blocking to MMD, where the scene is animated, and syncs the MMD project back into the Blender NLA layers while preserving the existing Blender NLA strips.</desc>
+<defs>
+<marker id="wf-arrow-grey" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#9CA3AF"/></marker>
+<marker id="wf-arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#FF9A3D"/></marker>
+<marker id="wf-arrow-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#4FD1C5"/></marker>
+<marker id="wf-arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#A78BFA"/></marker>
+</defs>
+
+<!-- Blender row -->
+<rect x="20" y="20" width="120" height="110" fill="#6B7280" stroke="#3E4450" stroke-width="1.5"/>
+<text x="80" y="80.5" font-size="16" fill="#FFFFFF" text-anchor="middle">Storyboard</text>
+
+<rect x="210" y="20" width="120" height="110" fill="#FFAB5C" stroke="#E86A00" stroke-width="1.5"/>
+<text x="270" y="61.5" font-size="16" fill="#3D1C00" text-anchor="middle">Initial</text>
+<text x="270" y="80.5" font-size="16" fill="#3D1C00" text-anchor="middle">blocking</text>
+<text x="270" y="99.5" font-size="16" fill="#3D1C00" text-anchor="middle">in Blender</text>
+
+<rect x="400" y="20" width="120" height="110" fill="#FFAB5C" stroke="#E86A00" stroke-width="1.5"/>
+<text x="460" y="71" font-size="16" fill="#3D1C00" text-anchor="middle">Blender</text>
+<text x="460" y="90" font-size="16" fill="#3D1C00" text-anchor="middle">animation</text>
+
+<rect x="590" y="20" width="120" height="110" fill="#FFAB5C" stroke="#E86A00" stroke-width="1.5"/>
+<text x="650" y="61.5" font-size="16" fill="#3D1C00" text-anchor="middle">Layer</text>
+<text x="650" y="80.5" font-size="16" fill="#3D1C00" text-anchor="middle">animation</text>
+<text x="650" y="99.5" font-size="16" fill="#3D1C00" text-anchor="middle">using NLA</text>
+
+<rect x="780" y="20" width="120" height="110" fill="#FFAB5C" stroke="#E86A00" stroke-width="1.5"/>
+<text x="840" y="61.5" font-size="16" fill="#3D1C00" text-anchor="middle">Lighting,</text>
+<text x="840" y="80.5" font-size="16" fill="#3D1C00" text-anchor="middle">Rendering,</text>
+<text x="840" y="99.5" font-size="16" fill="#3D1C00" text-anchor="middle">Compositing</text>
+
+<path d="M140,75 L210,75" fill="none" stroke="#9CA3AF" stroke-width="2" marker-end="url(#wf-arrow-grey)"/>
+<path d="M330,75 L400,75" fill="none" stroke="#FF9A3D" stroke-width="2" marker-end="url(#wf-arrow-orange)"/>
+<path d="M520,75 L590,75" fill="none" stroke="#FF9A3D" stroke-width="2" marker-end="url(#wf-arrow-orange)"/>
+<path d="M710,75 L780,75" fill="none" stroke="#FF9A3D" stroke-width="2" marker-end="url(#wf-arrow-orange)"/>
+
+<!-- NineSync Core bridge -->
+<rect x="222" y="162" width="478" height="30" fill="#7C3AED" fill-opacity="0.10" stroke="#A78BFA" stroke-width="2" stroke-dasharray="7 5"/>
+<circle cx="352" cy="177" r="8" fill="none" stroke="#C4B5FD" stroke-width="1.5"/>
+<text x="352" y="181.5" font-size="11.5" fill="#C4B5FD" text-anchor="middle" font-weight="700">9</text>
+<text x="366" y="182" font-size="14" fill="#C4B5FD" text-anchor="start" font-weight="700">NineSync Core (Blender add-on)</text>
+<text x="716" y="174" font-size="13" fill="#9CA3AF" text-anchor="start">Preserves existing</text>
+<text x="716" y="192" font-size="13" fill="#9CA3AF" text-anchor="start">Blender NLA strips</text>
+
+<path d="M270,130 L270,162" fill="none" stroke="#A78BFA" stroke-width="2"/>
+<path d="M270,192 L270,222" fill="none" stroke="#A78BFA" stroke-width="2" marker-end="url(#wf-arrow-purple)"/>
+<path d="M650,211 L650,192" fill="none" stroke="#A78BFA" stroke-width="2"/>
+<path d="M650,162 L650,130" fill="none" stroke="#A78BFA" stroke-width="2" marker-end="url(#wf-arrow-purple)"/>
+
+<!-- MMD row -->
+<rect x="210" y="222" width="120" height="110" fill="#7FE0D6" stroke="#1E9E92" stroke-width="1.5"/>
+<text x="270" y="263.5" font-size="16" fill="#053B35" text-anchor="middle">Export</text>
+<text x="270" y="282.5" font-size="16" fill="#053B35" text-anchor="middle">initial scene</text>
+<text x="270" y="301.5" font-size="16" fill="#053B35" text-anchor="middle">to MMD</text>
+
+<rect x="400" y="222" width="120" height="110" fill="#7FE0D6" stroke="#1E9E92" stroke-width="1.5"/>
+<text x="460" y="273" font-size="16" fill="#053B35" text-anchor="middle">MMD</text>
+<text x="460" y="292" font-size="16" fill="#053B35" text-anchor="middle">animation</text>
+
+<rect x="590" y="222" width="120" height="110" fill="#7FE0D6" stroke="#1E9E92" stroke-width="1.5"/>
+<text x="650" y="263.5" font-size="16" fill="#053B35" text-anchor="middle">Sync MMD</text>
+<text x="650" y="282.5" font-size="16" fill="#053B35" text-anchor="middle">project to</text>
+<text x="650" y="301.5" font-size="16" fill="#053B35" text-anchor="middle">Blender</text>
+
+<path d="M330,277 L400,277" fill="none" stroke="#4FD1C5" stroke-width="2" marker-end="url(#wf-arrow-teal)"/>
+<path d="M520,277 L590,277" fill="none" stroke="#4FD1C5" stroke-width="2" marker-end="url(#wf-arrow-teal)"/>
+
+<!-- Link badge where the sync starts -->
+<rect x="639" y="211" width="22" height="22" rx="5" fill="#FFFFFF" stroke="#CFCFD4" stroke-width="1"/>
+<g transform="rotate(-45 650 222)" fill="none" stroke="#7C3AED" stroke-width="2">
+<rect x="641" y="219" width="10" height="6" rx="3"/>
+<rect x="649" y="219" width="10" height="6" rx="3"/>
+</g>
+
+<!-- Notes -->
+<text x="205" y="362" font-size="14" fill="#E2E4E9" font-weight="700">Blocking props</text>
+<g font-size="13.5" fill="#E2E4E9">
+<text x="215" y="381">• Initial character poses</text>
+<text x="215" y="399">• Location markers</text>
+<text x="215" y="417">• Reference meshes</text>
+<text x="215" y="435">• Rough camera motions</text>
+</g>
+
+<text x="585" y="362" font-size="14" fill="#E2E4E9" font-weight="700">Supported MMD data for Blender</text>
+<g font-size="13.5" fill="#E2E4E9">
+<text x="595" y="381">• Armature keyframes</text>
+<text x="595" y="399">• Camera keyframes</text>
+<text x="595" y="417">• Shape keys</text>
+<text x="595" y="435">• Global lighting</text>
+<text x="595" y="453">• Static .x accessories</text>
+<text x="611" y="471">• Some MMEffects <tspan fill="#C4B5FD">(NineSync FX)</tspan></text>
+</g>
+</svg>
