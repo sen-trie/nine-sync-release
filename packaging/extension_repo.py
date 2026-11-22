@@ -6,10 +6,13 @@
         --blender <official blender 5.3+> --out site
     python packaging/extension_repo.py verify --zip dist/nine-sync-X-blender-extensions.zip --base-url <same url>
 
-assemble: downloads every version already served at BASE/index.json (each checked against the hash the index
-advertises), adds the new ZIP, and lets Blender's own `extension server-generate` write index.json (and the
-html listing). It refuses pre-release versions, a changed ZIP under an existing version, and a version that is not
-newer than the newest one already served. Nothing is uploaded; the workflow publishes the `--out` directory.
+assemble: puts the new ZIP alone in `--out` and lets Blender's own `extension server-generate` write index.json
+(and the html listing), so the index lists only the newest version; older versions stay on the GitHub releases.
+It refuses pre-release versions, a changed ZIP under an existing version, and a version older than one already
+served. Nothing is uploaded; the workflow publishes the `--out` directory.
+
+reindex: rebuilds `--out` from the newest ZIP already served at BASE (checked against its advertised hash), without
+a new build. Used to repair the published index.
 
 verify: fetches the PUBLIC index.json and ZIP over HTTPS and checks that they list and serve exactly the local ZIP.
 Standard library only (Python 3.11+ for tomllib).
@@ -119,33 +122,32 @@ def assemble(args):
         fail("output directory %s already exists" % out)
     os.makedirs(out)
 
-    kept = []
     for entry in read_index(base):
         if entry.get("id") != ext_id:
             fail("existing repository serves a different extension id %r; refusing to mix" % entry.get("id"))
-        name = os.path.basename(urllib.parse.urlparse(entry["archive_url"]).path)
-        data = fetch(urllib.parse.urljoin(base, entry["archive_url"]))
-        if "sha256:" + sha256_bytes(data) != entry["archive_hash"] or len(data) != entry["archive_size"]:
-            fail("served %s does not match the hash its own index advertises; refusing to republish it" % name)
         old = version_tuple(entry["version"])
-        if old == new_version:
-            if sha256_bytes(data) != digest:
-                fail("version %s is already published with different content; bump the version instead" % version)
-            continue  # identical re-deploy
         if old > new_version:
             fail("version %s is older than the already published %s" % (version, entry["version"]))
-        with open(os.path.join(out, name), "wb") as handle:
-            handle.write(data)
-        kept.append(entry["version"])
+        if old == new_version:
+            data = fetch(urllib.parse.urljoin(base, entry["archive_url"]))
+            if sha256_bytes(data) != digest:
+                fail("version %s is already published with different content; bump the version instead" % version)
 
-    target = os.path.join(out, os.path.basename(new_zip))
-    shutil.copyfile(new_zip, target)
+    shutil.copyfile(new_zip, os.path.join(out, os.path.basename(new_zip)))
+    generate(args.blender, out, ext_id, version)
+    return 0
+
+
+def generate(blender, out, ext_id, version):
+    """Run Blender's server-generate on `out`, which holds exactly one ZIP, and check the index lists only it.
+
+    The index lists one version only: several entries with the same id and Blender range are duplicates to
+    Blender, and readers see the oldest first. Older versions stay downloadable from the GitHub releases."""
     open(os.path.join(out, ".nojekyll"), "w").close()
-
     profile = tempfile.mkdtemp(prefix="nine-sync-repo-profile-")
     env = dict(os.environ, BLENDER_USER_RESOURCES=profile)
     try:
-        result = subprocess.run([args.blender, "--factory-startup", "--background", "--command", "extension",
+        result = subprocess.run([blender, "--factory-startup", "--background", "--command", "extension",
                                  "server-generate", "--repo-dir", out, "--html"],
                                 env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=600)
     finally:
@@ -155,15 +157,38 @@ def assemble(args):
         fail("blender extension server-generate failed (exit %d)" % result.returncode)
 
     index = json.load(open(os.path.join(out, "index.json"), encoding="utf-8"))["data"]
-    versions = sorted(e["version"] for e in index)
-    expected = sorted(kept + [version])
-    if versions != expected:
-        fail("generated index lists %s, expected %s" % (versions, expected))
-    for entry in index:
-        path = os.path.join(out, os.path.basename(entry["archive_url"]))
-        if not os.path.isfile(path) or entry["archive_hash"] != "sha256:" + sha256_file(path):
-            fail("generated index entry %s does not match its file" % entry["version"])
-    print("assembled %s: versions %s" % (out, ", ".join(expected)))
+    if [(e.get("id"), e.get("version")) for e in index] != [(ext_id, version)]:
+        fail("generated index lists %s, expected only %s %s" % ([(e.get("id"), e.get("version")) for e in index], ext_id, version))
+    entry = index[0]
+    path = os.path.join(out, os.path.basename(entry["archive_url"]))
+    if not os.path.isfile(path) or entry["archive_hash"] != "sha256:" + sha256_file(path):
+        fail("generated index entry %s does not match its file" % version)
+    print("assembled %s: %s %s" % (out, ext_id, version))
+
+
+def reindex(args):
+    """Rebuild the repository from the newest version it already serves, byte for byte (no new build)."""
+    base = normalise_base(args.base_url)
+    entries = read_index(base)
+    if not entries:
+        fail("%sindex.json lists nothing to re-index" % base)
+    ids = {e.get("id") for e in entries}
+    if len(ids) != 1:
+        fail("existing repository serves several extension ids %s; refusing to guess" % sorted(ids))
+    newest = max(entries, key=lambda e: version_tuple(e["version"]))
+    name = os.path.basename(urllib.parse.urlparse(newest["archive_url"]).path)
+    data = fetch(urllib.parse.urljoin(base, newest["archive_url"]))
+    if "sha256:" + sha256_bytes(data) != newest["archive_hash"] or len(data) != newest["archive_size"]:
+        fail("served %s does not match the hash its own index advertises; refusing to republish it" % name)
+    out = os.path.abspath(args.out)
+    if os.path.exists(out):
+        fail("output directory %s already exists" % out)
+    os.makedirs(out)
+    with open(os.path.join(out, name), "wb") as handle:
+        handle.write(data)
+    if zip_manifest(os.path.join(out, name))["version"] != newest["version"]:
+        fail("%s does not contain version %s" % (name, newest["version"]))
+    generate(args.blender, out, newest["id"], newest["version"])
     return 0
 
 
@@ -203,13 +228,17 @@ def main():
     a.add_argument("--base-url", required=True)
     a.add_argument("--blender", required=True)
     a.add_argument("--out", required=True)
+    r = sub.add_parser("reindex")
+    r.add_argument("--base-url", required=True)
+    r.add_argument("--blender", required=True)
+    r.add_argument("--out", required=True)
     v = sub.add_parser("verify")
     v.add_argument("--zip", required=True)
     v.add_argument("--base-url", required=True)
     v.add_argument("--attempts", type=int, default=12)
     v.add_argument("--delay", type=int, default=15)
     args = parser.parse_args()
-    return assemble(args) if args.command == "assemble" else verify(args)
+    return {"assemble": assemble, "reindex": reindex, "verify": verify}[args.command](args)
 
 
 if __name__ == "__main__":

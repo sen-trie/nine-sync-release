@@ -1,0 +1,108 @@
+name: Re-index extension repository
+
+# Manual repair of the GitHub Pages extension repository: rebuilds index.json from the newest ZIP already served
+# there (checked against its advertised hash, byte for byte, no new build) and redeploys it. Use it when the index
+# needs regenerating without a new release, for example after a change to how extension_repo.py writes it.
+# Deploying waits for the `extension-repository` environment approval, as in release.yml.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: extension-repository
+  cancel-in-progress: false
+
+jobs:
+  reindex:
+    name: Re-index from the served ZIP
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: extension-repository
+    outputs:
+      base_url: ${{ steps.url.outputs.base_url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Repository URL
+        id: url
+        env:
+          OVERRIDE: ${{ vars.EXTENSION_REPO_URL }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+        run: |
+          url="${OVERRIDE:-https://$(echo "$OWNER" | tr '[:upper:]' '[:lower:]').github.io/$REPO/}"
+          echo "base_url=$url" >> "$GITHUB_OUTPUT"
+          echo "Extension repository: ${url}index.json"
+      - name: Blender runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libxkbcommon0 libsm6 libegl1
+      - name: Fetch official Blender
+        id: blender
+        run: |
+          exe=$(python -I packaging/fetch_blender.py --version 5.3.0 --dest build/blender)
+          [ "$(cat build/blender/official.txt)" = "true" ] || { echo "official Blender required" >&2; exit 1; }
+          echo "exe=$exe" >> "$GITHUB_OUTPUT"
+      - name: Re-index with Blender's server-generate
+        env:
+          BASE_URL: ${{ steps.url.outputs.base_url }}
+          BLENDER_EXE: ${{ steps.blender.outputs.exe }}
+        run: python -I packaging/extension_repo.py reindex --base-url "$BASE_URL" --blender "$BLENDER_EXE" --out site
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: reindexed-zip
+          path: site/*.zip
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site/
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: reindex
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ needs.reindex.outputs.base_url }}index.json
+    steps:
+      - uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  verify:
+    name: Verify the public repository
+    needs: [reindex, deploy]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: reindexed-zip
+          path: dist
+      - name: index.json lists only the served ZIP
+        env:
+          BASE_URL: ${{ needs.reindex.outputs.base_url }}
+        run: |
+          python -I packaging/extension_repo.py verify --zip dist/*.zip --base-url "$BASE_URL"
+          python - <<'EOF'
+          import json, os, urllib.request
+          url = os.environ["BASE_URL"] + "index.json"
+          data = json.load(urllib.request.urlopen(urllib.request.Request(url, headers={"Cache-Control": "no-cache"})))["data"]
+          assert len(data) == 1, "index still lists %d entries" % len(data)
+          print("index lists only", data[0]["id"], data[0]["version"])
+          EOF
