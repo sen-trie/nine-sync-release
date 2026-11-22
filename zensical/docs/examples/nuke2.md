@@ -23,7 +23,7 @@ Nuke2 is an MME effect with a central core and several smoke passes that draw ma
 
 <div class="ns-media"><strong>Screenshot</strong><span>The MMD Accessory (.x) import dialog with Scale, MME Effect and Effect File.</span></div>
 
-If FX shows a warning, check the list of missing files. See [Troubleshooting](#troubleshooting).
+If FX shows a warning, check the list of missing files. See [Troubleshooting](../manual/fx/import.md#troubleshooting).
 
 ## 2. Inspect the passes
 
