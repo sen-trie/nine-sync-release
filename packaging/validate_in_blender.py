@@ -116,6 +116,10 @@ def main():
                 built = os.path.join(profile, "standalone_" + key)
                 source = os.path.join(os.path.abspath(args.source_root), folder)
                 os.makedirs(built, exist_ok=True)
+                if not os.path.isfile(os.path.join(source, "blender_manifest.toml")):
+                    step("standalone %s builds from the same sources" % key, False,
+                         "%s has no blender_manifest.toml; check out the submodules (git submodule update --init)" % source)
+                    continue
                 code, out = run(base + ["--command", "extension", "build", "--source-dir", source, "--output-dir", built], env)
                 archives = [n for n in os.listdir(built) if n.endswith(".zip")] if os.path.isdir(built) else []
                 if step("standalone %s builds from the same sources" % key, code == 0 and len(archives) == 1, out.strip()[-300:]):
