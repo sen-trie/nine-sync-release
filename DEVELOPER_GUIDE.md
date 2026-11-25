@@ -30,7 +30,7 @@ python -I packaging/build_bundle.py --out dist --staging build/staging --cache b
 blender --command extension build --output-dir ../dist
 ```
 
-Install the resulting ZIP from **Blender > Preferences > Get Extensions > Install from Disk**. Restart Blender after failed registration or when testing changes that do not reload cleanly. Logs appear in the Blender text block `NineSyncLog` and in the console.
+Install the resulting ZIP from **Blender > Preferences > Get Extensions > Install from Disk**. Logs appear in the Blender text block `NineSyncLog` and in the console.
 
 ## Project Structure
 
@@ -45,7 +45,7 @@ nine-sync-release/
 └── .github/            # CI and contribution templates
 ```
 
-Make changes in the repository that owns the feature. Core and FX communicate through the versioned `ninesync_hooks` API, **not** direct imports. Coordinate changes to `hooks.py` across both repositories. The release repo pins component commits instead of copying their source manually.
+Core and FX communicate through the versioned `ninesync_hooks` API.
 
 ## Coding Standards
 
@@ -65,7 +65,7 @@ python nine-sync-core/tests/check_static.py
 blender -b --factory-startup --python nine-sync-core/tests/t_registration.py
 ```
 
-Core and FX have additional tests in their `tests/` folders. Some Blender/FX integration tests require locally supplied fixtures. Use an isolated Blender profile for testing. For performance changes, measure an animated scene and record Blender version, hardware and test conditions.
+Core and FX have additional tests in their `tests/` folders. Some Blender/FX integration tests require locally supplied fixtures. Use an isolated Blender profile for testing.
 
 ## Translations
 
@@ -94,6 +94,4 @@ See [packaging/README.md](packaging/README.md) for the full release checklist.
 
 ## Contributing
 
-Open issues in the [release issue tracker](https://github.com/sen-trie/nine-sync-release/issues), but submit code changes to the owning repository. Keep PRs scoped, document reproduction steps and tests, and add user-visible changes to the owning `CHANGELOG.md`.
-
-AI-assisted contributions are allowed, but the submitter must understand and review the result and verify all claimed tests.
+Keep PRs scoped, document reproduction steps and tests, and add user-visible changes to the owning `CHANGELOG.md`. AI-assisted contributions are allowed, but the submitter must understand and review the result and verify all claimed tests.
